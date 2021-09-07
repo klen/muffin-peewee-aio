@@ -5,7 +5,8 @@ import typing as t
 import muffin
 from muffin.plugins import BasePlugin
 from peewee_migrate import Router
-from peewee_aio import Manager
+from peewee_aio.model import AIOModel
+from peewee_aio.manager import Manager, cached_property
 
 from .fields import JSONField, Choices
 
@@ -105,12 +106,21 @@ class Plugin(BasePlugin):
         """Disconnect from the database (close a pool and etc.)."""
         await self.manager.disconnect()
 
-    async def __aenter__(self):
-        await self.manager.aio_database.connect()
+    async def __aenter__(self) -> 'Plugin':
+        """Connect the database."""
+        manager = t.cast(Manager, self.manager)
+        await manager.aio_database.connect()
         return self
 
     async def __aexit__(self, *args):
+        """Disconnect the database."""
         await self.manager.aio_database.disconnect()
+
+    @cached_property
+    def Model(self) -> AIOModel:
+        """Generate base async model class."""
+        manager = t.cast(Manager, self.manager)
+        return manager.Model
 
     def __getattr__(self, name: str) -> t.Any:
         """Proxy attrs to self database."""

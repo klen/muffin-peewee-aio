@@ -5,19 +5,19 @@ async def test_json_field(db, transaction):
     from muffin_peewee import JSONField
 
     @db.register
-    class Test(peewee.Model):
+    class Test(db.Model):
         data = peewee.CharField()
         json = JSONField(default={})
 
     manager = db.manager
 
-    await manager.create_tables(Test)
+    await Test.create_table()
 
-    ins = Test(data='some', json={'key': 'value'})
-    ins = await manager.save(ins)
-    assert ins.json
+    inst = Test(data='some', json={'key': 'value'})
+    inst = await inst.save()
+    assert inst.json
 
-    test = await manager.get(Test)
+    test = await Test.get()
     assert test.json == {'key': 'value'}
 
 
@@ -25,13 +25,13 @@ async def test_uuid(db, transaction):
     """ Test for UUID in Sqlite. """
 
     @db.register
-    class M(peewee.Model):
+    class M(db.Model):
         data = peewee.UUIDField()
 
-    await db.manager.create_tables(M)
+    await M.create_table()
 
     import uuid
     m = M(data=uuid.uuid1())
-    await db.manager.save(m)
+    await m.save()
 
-    assert await db.manager.get(M) == m
+    assert await M.get() == m
