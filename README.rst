@@ -99,14 +99,13 @@ Queries
 
 .. code-block:: python
 
-    @db.register
-    class Test(peewee.Model):
+    class Test(db.Model):
         data = peewee.CharField()
 
 
     @app.route('/')
     async def view(request):
-        return [t.data async for t in db.manager.run(Test.select())]
+        return [t.data async for t in Test.select()]
 
 Manage connections
 ------------------
