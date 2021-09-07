@@ -1,4 +1,5 @@
 from unittest import mock
+import sys
 
 import muffin
 import peewee
@@ -14,10 +15,12 @@ async def test_lifespan():
         with mock.patch.object(db.manager.aio_database, 'disconnect') as mock_disconnect:
             async with app.lifespan:
                 assert mock_connect.called
-                assert mock_connect.await_count == 1
+                if sys.version_info > (3, 8):
+                    assert mock_connect.await_count == 1
 
             assert mock_disconnect.called
-            assert mock_disconnect.await_count == 1
+            if sys.version_info > (3, 8):
+                assert mock_disconnect.await_count == 1
 
 
 async def test_auto_connect(tmp_path):
