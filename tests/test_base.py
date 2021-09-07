@@ -13,3 +13,10 @@ async def test_conftest(db, transaction):
 
     await db.conftest()
     assert await db.manager.run(Test.select()) == []
+
+
+async def test_context_manager(app):
+    import muffin_peewee
+
+    async with muffin_peewee.Plugin(app) as db:
+        assert db

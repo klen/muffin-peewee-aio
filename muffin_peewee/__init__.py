@@ -105,6 +105,13 @@ class Plugin(BasePlugin):
         """Disconnect from the database (close a pool and etc.)."""
         await self.manager.disconnect()
 
+    async def __aenter__(self):
+        await self.manager.aio_database.connect()
+        return self
+
+    async def __aexit__(self, *args):
+        await self.manager.aio_database.disconnect()
+
     def __getattr__(self, name: str) -> t.Any:
         """Proxy attrs to self database."""
         return getattr(self.manager, name)
