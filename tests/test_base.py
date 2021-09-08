@@ -20,3 +20,27 @@ async def test_context_manager(app):
 
     async with muffin_peewee.Plugin(app) as db:
         assert db
+
+
+async def test_delayed_registration(app):
+    import muffin_peewee
+
+    db = muffin_peewee.Plugin()
+    assert db
+    assert db.manager
+
+    @db.register
+    class TestModel(peewee.Model):
+        data = peewee.CharField()
+
+    assert TestModel._meta.manager
+    assert TestModel._meta.database
+    assert TestModel._meta.database.database == ''
+
+    manager = TestModel._meta.manager
+
+    db.setup(app)
+
+    assert TestModel._meta.manager is not manager
+    assert TestModel._meta.database
+    assert TestModel._meta.database.database == ':memory:'

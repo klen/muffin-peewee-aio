@@ -32,7 +32,7 @@ class Plugin(BasePlugin):
     defaults = {
 
         # Connection params
-        'connection': 'sqlite+async:///db.sqlite',
+        'connection': 'sqlite:///db.sqlite',
         'connection_params': {},
 
         # Manage connections automatically
@@ -45,12 +45,17 @@ class Plugin(BasePlugin):
     }
 
     router: t.Optional[Router] = None
-    manager: t.Optional[Manager] = None
+    manager: Manager = Manager('dummy://localhost')  # Dummy manager for support registration
 
     def setup(self, app: muffin.Application, **options):
         """Init the plugin."""
         super().setup(app, **options)
-        self.manager = manager = Manager(self.cfg.connection, **self.cfg.connection_params)
+
+        # Init manager and rebind models
+        manager = Manager(self.cfg.connection, **self.cfg.connection_params)
+        for model in list(self.manager):
+            manager.register(model)
+        self.manager = manager
 
         if self.cfg.migrations_enabled:
             router = Router(manager.pw_database, migrate_dir=self.cfg.migrations_path)
@@ -109,8 +114,7 @@ class Plugin(BasePlugin):
 
     async def __aenter__(self) -> 'Plugin':
         """Connect the database."""
-        manager = t.cast(Manager, self.manager)
-        await manager.aio_database.connect()
+        await self.manager.aio_database.connect()
         return self
 
     async def __aexit__(self, *args):
@@ -152,5 +156,4 @@ class Plugin(BasePlugin):
     @cached_property
     def Model(self) -> AIOModel:
         """Generate base async model class."""
-        manager = t.cast(Manager, self.manager)
-        return manager.Model
+        return self.manager.Model
