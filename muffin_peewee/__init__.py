@@ -4,6 +4,7 @@ import typing as t
 
 import muffin
 from muffin.plugins import BasePlugin
+from peewee import Model
 from peewee_migrate import Router
 from peewee_aio.model import AIOModel
 from peewee_aio.manager import Manager, cached_property
@@ -52,7 +53,7 @@ class Plugin(BasePlugin):
         self.manager = manager = Manager(self.cfg.connection, **self.cfg.connection_params)
 
         if self.cfg.migrations_enabled:
-            router = Router(self.manager.pw_database, migrate_dir=self.cfg.migrations_path)
+            router = Router(manager.pw_database, migrate_dir=self.cfg.migrations_path)
             self.router = router
 
             # Register migration commands
@@ -116,15 +117,17 @@ class Plugin(BasePlugin):
         """Disconnect the database."""
         await self.manager.aio_database.disconnect()
 
-    @cached_property
-    def Model(self) -> AIOModel:
-        """Generate base async model class."""
-        manager = t.cast(Manager, self.manager)
-        return manager.Model
-
     def __getattr__(self, name: str) -> t.Any:
         """Proxy attrs to self database."""
         return getattr(self.manager, name)
+
+    async def create_tables(self, *Models: Model):
+        """Create SQL tables."""
+        await self.manager.create_tables(*(Models or list(self.manager)))
+
+    async def drop_tables(self, *Models: Model):
+        """Drop SQL tables."""
+        await self.manager.drop_tables(*(Models or list(self.manager)))
 
     def get_middleware(self) -> t.Callable:
         """Generate a middleware to manage connection/transaction."""
@@ -144,4 +147,10 @@ class Plugin(BasePlugin):
 
     async def conftest(self):
         """Prepare database tables for tests."""
-        await self.manager.create_tables(*self.manager)
+        await self.create_tables()
+
+    @cached_property
+    def Model(self) -> AIOModel:
+        """Generate base async model class."""
+        manager = t.cast(Manager, self.manager)
+        return manager.Model
