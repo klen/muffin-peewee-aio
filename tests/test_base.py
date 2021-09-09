@@ -11,8 +11,9 @@ async def test_conftest(db, transaction):
     with pytest.raises(peewee.DatabaseError):
         assert await Test.select() == []
 
-    await db.conftest()
+    await db.create_tables()
     assert await Test.select() == []
+    await db.drop_tables()
 
 
 async def test_context_manager(app):

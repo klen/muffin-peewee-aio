@@ -149,10 +149,6 @@ class Plugin(BasePlugin):
 
         return middleware
 
-    async def conftest(self):
-        """Prepare database tables for tests."""
-        await self.create_tables()
-
     @cached_property
     def Model(self) -> AIOModel:
         """Generate base async model class."""
