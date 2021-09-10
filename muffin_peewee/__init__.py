@@ -137,13 +137,13 @@ class Plugin(BasePlugin):
         """Generate a middleware to manage connection/transaction."""
 
         async def middleware(handler, request, receive, send):
-            async with self.manager.connection(True):
+            async with self.manager.connection():
                 return await handler(request, receive, send)
 
         if self.cfg.auto_transaction:
 
             async def middleware(handler, request, receive, send):  # noqa
-                async with self.manager.connection(True):
+                async with self.manager.connection():
                     async with self.manager.transaction():
                         return await handler(request, receive, send)
 
