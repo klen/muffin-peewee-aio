@@ -80,7 +80,7 @@ class Plugin(BasePlugin):
                 :param auto: Track changes and setup migrations automatically
                 """
                 with manager.allow_sync():
-                    router.create(name, auto and [m for m in self.models.values()])
+                    router.create(name, auto and [m for m in self.models])
 
             @app.manage
             def pw_rollback(name: str = None):
