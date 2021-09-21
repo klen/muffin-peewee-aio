@@ -41,9 +41,10 @@ Installation
 
 You can install optional database drivers with: ::
 
-    $ pip install muffin-peewee-aio[sqlite]
-    $ pip install muffin-peewee-aio[postgresql]
-    $ pip install muffin-peewee-aio[mysql]
+    $ pip install muffin-peewee-aio[aiosqlite]
+    $ pip install muffin-peewee-aio[aiopg]
+    $ pip install muffin-peewee-aio[asyncpg]
+    $ pip install muffin-peewee-aio[aiomysql]
 
 
 .. _usage:
