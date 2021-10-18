@@ -1,0 +1,4 @@
+muffin          >= 0.83
+peewee          >= 3
+peewee-aio      >= 0.8.0
+peewee-migrate  >= 1.4.6
