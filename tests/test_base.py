@@ -34,14 +34,14 @@ async def test_delayed_registration(app):
     class TestModel(peewee.Model):
         data = peewee.CharField()
 
-    assert TestModel._meta.manager
+    assert TestModel._manager
     assert TestModel._meta.database
     assert TestModel._meta.database.database == ''
 
-    manager = TestModel._meta.manager
+    manager = TestModel._manager
 
     db.setup(app)
 
-    assert TestModel._meta.manager is not manager
+    assert TestModel._manager is not manager
     assert TestModel._meta.database
     assert TestModel._meta.database.database == ':memory:'

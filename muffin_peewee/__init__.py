@@ -7,7 +7,7 @@ from muffin.plugins import BasePlugin
 from peewee import Model
 from peewee_migrate import Router
 from peewee_aio.model import AIOModel
-from peewee_aio.manager import Manager, cached_property
+from peewee_aio.manager import Manager
 
 from .fields import JSONField, Choices
 
@@ -56,13 +56,13 @@ class Plugin(BasePlugin):
         for model in list(self.manager):
             manager.register(model)
         self.manager = manager
+        self.Model: t.Type[AIOModel] = self.manager.Model
 
         if self.cfg.migrations_enabled:
             router = Router(manager.pw_database, migrate_dir=self.cfg.migrations_path)
             self.router = router
 
             # Register migration commands
-            @app.manage
             def pw_migrate(name: str = None, fake: bool = False):
                 """Run application's migrations.
 
@@ -72,7 +72,8 @@ class Plugin(BasePlugin):
                 with manager.allow_sync():
                     router.run(name, fake=fake)
 
-            @app.manage
+            app.manage(pw_migrate)
+
             def pw_create(name: str = 'auto', auto: bool = False):
                 """Create a migration.
 
@@ -82,7 +83,8 @@ class Plugin(BasePlugin):
                 with manager.allow_sync():
                     router.create(name, auto and [m for m in self.models])
 
-            @app.manage
+            app.manage(pw_create)
+
             def pw_rollback(name: str = None):
                 """Rollback a migration.
 
@@ -91,15 +93,18 @@ class Plugin(BasePlugin):
                 with manager.allow_sync():
                     router.rollback(name)
 
-            @app.manage
+            app.manage(pw_rollback)
+
             def pw_list():
                 """List migrations."""
                 with manager.allow_sync():
                     router.logger.info('Migrations are done:')
-                    router.logger.info('\n'.join(self.router.done))
+                    router.logger.info('\n'.join(router.done))
                     router.logger.info('')
                     router.logger.info('Migrations are undone:')
-                    router.logger.info('\n'.join(self.router.diff))
+                    router.logger.info('\n'.join(router.diff))
+
+            app.manage(pw_list)
 
         if self.cfg.auto_connection:
             app.middleware(self.get_middleware(), insert_first=True)
@@ -117,7 +122,7 @@ class Plugin(BasePlugin):
         await self.manager.aio_database.connect()
         return self
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, *_):
         """Disconnect the database."""
         await self.manager.aio_database.disconnect()
 
@@ -125,18 +130,18 @@ class Plugin(BasePlugin):
         """Proxy attrs to self database."""
         return getattr(self.manager, name)
 
-    async def create_tables(self, *Models: Model):
+    async def create_tables(self, *Models: t.Type[Model]):
         """Create SQL tables."""
-        await self.manager.create_tables(*(Models or list(self.manager)))
+        await self.manager.create_tables(*(Models or self.manager.models))
 
-    async def drop_tables(self, *Models: Model):
+    async def drop_tables(self, *Models: t.Type[Model]):
         """Drop SQL tables."""
-        await self.manager.drop_tables(*(Models or list(self.manager)))
+        await self.manager.drop_tables(*(Models or self.manager.models))
 
     def get_middleware(self) -> t.Callable:
         """Generate a middleware to manage connection/transaction."""
 
-        async def middleware(handler, request, receive, send):
+        async def middleware(handler, request, receive, send):  # type: ignore
             async with self.manager.connection():
                 return await handler(request, receive, send)
 
@@ -148,8 +153,3 @@ class Plugin(BasePlugin):
                         return await handler(request, receive, send)
 
         return middleware
-
-    @cached_property
-    def Model(self) -> AIOModel:
-        """Generate base async model class."""
-        return self.manager.Model
