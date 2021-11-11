@@ -12,7 +12,7 @@ from peewee_aio.manager import Manager
 from .fields import JSONField, Choices
 
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __project__ = "muffin-peewee-aio"
 __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
