@@ -7,7 +7,8 @@ from muffin.plugins import BasePlugin
 from peewee import Model
 from peewee_migrate import Router
 from peewee_aio.model import AIOModel
-from peewee_aio.manager import Manager
+from peewee_aio.manager import Manager, TMODEL
+from aio_databases.database import Database, ConnectionContext, TransactionContext
 
 from .fields import JSONField, Choices
 
@@ -46,6 +47,7 @@ class Plugin(BasePlugin):
 
     router: t.Optional[Router] = None
     manager: Manager = Manager('dummy://localhost')  # Dummy manager for support registration
+    database: Database
 
     def setup(self, app: muffin.Application, **options):
         """Init the plugin."""
@@ -56,6 +58,7 @@ class Plugin(BasePlugin):
         for model in list(self.manager):
             manager.register(model)
         self.manager = manager
+        self.database = manager.aio_database
         self.Model: t.Type[AIOModel] = self.manager.Model
 
         if self.cfg.migrations_enabled:
@@ -81,7 +84,7 @@ class Plugin(BasePlugin):
                 :param auto: Track changes and setup migrations automatically
                 """
                 with manager.allow_sync():
-                    router.create(name, auto and [m for m in self.models])
+                    router.create(name, auto and [m for m in self.manager.models])
 
             app.manage(pw_create)
 
@@ -111,24 +114,30 @@ class Plugin(BasePlugin):
 
     async def startup(self):
         """Connect to the database (initialize a pool and etc)."""
-        await self.manager.connect()
+        await self.database.connect()
 
     async def shutdown(self):
         """Disconnect from the database (close a pool and etc.)."""
-        await self.manager.disconnect()
+        await self.database.disconnect()
 
     async def __aenter__(self) -> 'Plugin':
         """Connect the database."""
-        await self.manager.aio_database.connect()
+        await self.database.connect()
         return self
 
     async def __aexit__(self, *_):
         """Disconnect the database."""
-        await self.manager.aio_database.disconnect()
+        await self.database.disconnect()
 
-    def __getattr__(self, name: str) -> t.Any:
-        """Proxy attrs to self database."""
-        return getattr(self.manager, name)
+    def register(self, Model: t.Type[TMODEL]) -> t.Type[TMODEL]:
+        """Register a model with self manager."""
+        return self.manager.register(Model)
+
+    def connection(self, *params, **opts) -> ConnectionContext:
+        return self.database.connection(*params, **opts)
+
+    def transaction(self, *params, **opts) -> TransactionContext:
+        return self.database.transaction(*params, **opts)
 
     async def create_tables(self, *Models: t.Type[Model]):
         """Create SQL tables."""
@@ -142,14 +151,14 @@ class Plugin(BasePlugin):
         """Generate a middleware to manage connection/transaction."""
 
         async def middleware(handler, request, receive, send):  # type: ignore
-            async with self.manager.connection():
+            async with self.connection():
                 return await handler(request, receive, send)
 
         if self.cfg.auto_transaction:
 
             async def middleware(handler, request, receive, send):  # noqa
-                async with self.manager.connection():
-                    async with self.manager.transaction():
+                async with self.connection():
+                    async with self.transaction():
                         return await handler(request, receive, send)
 
         return middleware
