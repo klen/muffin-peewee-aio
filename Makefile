@@ -64,7 +64,7 @@ mypy: $(VIRTUAL_ENV)
 
 .PHONY: example
 example: $(VIRTUAL_ENV)
-	@$(VIRTUAL_ENV)/bin/muffin example pw_migrate
+	@$(VIRTUAL_ENV)/bin/muffin example peewee_migrate
 	@$(VIRTUAL_ENV)/bin/uvicorn --reload --port 5000 example:app
 
 .PHONY: upload

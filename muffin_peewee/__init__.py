@@ -3,15 +3,14 @@
 import typing as t
 
 import muffin
+from aio_databases.database import ConnectionContext, Database, TransactionContext
 from muffin.plugins import BasePlugin
 from peewee import Model
-from peewee_migrate import Router
+from peewee_aio.manager import TMODEL, Manager
 from peewee_aio.model import AIOModel
-from peewee_aio.manager import Manager, TMODEL
-from aio_databases.database import Database, ConnectionContext, TransactionContext
+from peewee_migrate import Router
 
-from .fields import JSONField, Choices
-
+from .fields import Choices, JSONField
 
 __version__ = "0.5.0"
 __project__ = "muffin-peewee-aio"
@@ -19,7 +18,7 @@ __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
 
 
-__all__ = 'Plugin', 'JSONField', 'Choices'
+__all__ = "Plugin", "JSONField", "Choices"
 
 
 assert JSONField and Choices
@@ -31,22 +30,21 @@ class Plugin(BasePlugin):
 
     name = "peewee"
     defaults = {
-
         # Connection params
-        'connection': 'sqlite:///db.sqlite',
-        'connection_params': {},
-
+        "connection": "sqlite:///db.sqlite",
+        "connection_params": {},
         # Manage connections automatically
-        'auto_connection': True,
-        'auto_transaction': True,
-
+        "auto_connection": True,
+        "auto_transaction": True,
         # Setup migration engine
-        'migrations_enabled': True,
-        'migrations_path': 'migrations',
+        "migrations_enabled": True,
+        "migrations_path": "migrations",
     }
 
-    router: t.Optional[Router] = None
-    manager: Manager = Manager('dummy://localhost')  # Dummy manager for support registration
+    router: Router = None
+    manager: Manager = Manager(
+        "dummy://localhost"
+    )  # Dummy manager for support registration
     database: Database
 
     def setup(self, app: muffin.Application, **options):
@@ -66,7 +64,8 @@ class Plugin(BasePlugin):
             self.router = router
 
             # Register migration commands
-            def pw_migrate(name: str = None, fake: bool = False):
+            @app.manage
+            def peewee_migrate(name: str = None, fake: bool = False):
                 """Run application's migrations.
 
                 :param name: Choose a migration' name
@@ -75,9 +74,8 @@ class Plugin(BasePlugin):
                 with manager.allow_sync():
                     router.run(name, fake=fake)
 
-            app.manage(pw_migrate)
-
-            def pw_create(name: str = 'auto', auto: bool = False):
+            @app.manage
+            def peewee_create(name: str = "auto", auto: bool = False):
                 """Create a migration.
 
                 :param name: Set name of migration [auto]
@@ -86,9 +84,8 @@ class Plugin(BasePlugin):
                 with manager.allow_sync():
                     router.create(name, auto and [m for m in self.manager.models])
 
-            app.manage(pw_create)
-
-            def pw_rollback(name: str = None):
+            @app.manage
+            def peewee_rollback(name: str = None):
                 """Rollback a migration.
 
                 :param name: Migration name (actually it always should be a last one)
@@ -96,18 +93,27 @@ class Plugin(BasePlugin):
                 with manager.allow_sync():
                     router.rollback(name)
 
-            app.manage(pw_rollback)
-
-            def pw_list():
+            @app.manage
+            def peewee_list():
                 """List migrations."""
                 with manager.allow_sync():
-                    router.logger.info('Migrations are done:')
-                    router.logger.info('\n'.join(router.done))
-                    router.logger.info('')
-                    router.logger.info('Migrations are undone:')
-                    router.logger.info('\n'.join(router.diff))
+                    router.logger.info("Migrations are done:")
+                    router.logger.info("\n".join(router.done))
+                    router.logger.info("")
+                    router.logger.info("Migrations are undone:")
+                    router.logger.info("\n".join(router.diff))
 
-            app.manage(pw_list)
+            @app.manage
+            def peewee_clear():
+                """Clear migrations from DB."""
+                with manager.allow_sync():
+                    self.router.clear()
+
+            @app.manage
+            def peewee_merge(name: str = "initial", clear: bool = False):
+                """Merge all migrations into one."""
+                with manager.allow_sync():
+                    self.router.merge(name)
 
         if self.cfg.auto_connection:
             app.middleware(self.get_middleware(), insert_first=True)
@@ -120,7 +126,7 @@ class Plugin(BasePlugin):
         """Disconnect from the database (close a pool and etc.)."""
         await self.database.disconnect()
 
-    async def __aenter__(self) -> 'Plugin':
+    async def __aenter__(self) -> "Plugin":
         """Connect the database."""
         await self.database.connect()
         return self
