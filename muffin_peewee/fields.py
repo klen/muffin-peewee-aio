@@ -1,7 +1,7 @@
 """Custom fields/properties."""
 
-import typing as t
 import json
+import typing as t
 
 import peewee as pw
 
@@ -23,7 +23,12 @@ class JSONField(pw.Field):
     unpack = False
 
     def __init__(
-            self, json_dumps: t.Callable = None, json_loads: t.Callable = None, *args, **kwargs):
+        self,
+        json_dumps: t.Callable = None,
+        json_loads: t.Callable = None,
+        *args,
+        **kwargs
+    ):
         """Initialize the serializer."""
         self._json_dumps = json_dumps or json.dumps
         self._json_loads = json_loads or json.loads
@@ -40,12 +45,12 @@ class JSONField(pw.Field):
         if isinstance(database, pw.Proxy):
             database = database.obj
         if Json and isinstance(database, pw.PostgresqlDatabase):
-            return 'json'
-        return 'text'
+            return "json"
+        return "text"
 
     def python_value(self, value):
         """Deserialize value from DB."""
-        if value is not None and self.field_type == 'text':
+        if value is not None and self.field_type == "text":
             try:
                 return self._json_loads(value)
             except (TypeError, ValueError):
@@ -58,11 +63,11 @@ class JSONField(pw.Field):
         if value is None:
             return value
 
-        if self.field_type == 'text':
+        if self.field_type == "text":
             return self._json_dumps(value)
 
         if not isinstance(value, Json):
-            return pw.Cast(self._json_dumps(value), 'json')
+            return pw.Cast(self._json_dumps(value), "json")
 
         return value
 
@@ -71,12 +76,12 @@ class Choices:
 
     """Model's choices helper."""
 
-    __slots__ = '_choices', '_map', '_rmap'
+    __slots__ = "_choices", "_map", "_rmap"
 
     def __init__(self, choices, *args):
         """Parse provided choices."""
         if isinstance(choices, dict):
-            choices = [(n, v) for v, n in choices.items()]
+            choices = [(value, name) for name, value in choices.items()]
 
         elif args:
             choices = [choices, *args]
@@ -87,6 +92,10 @@ class Choices:
         ]
         self._map = dict([(n, v) for v, n in self._choices])
         self._rmap = dict(self._choices)
+
+    def __str__(self):
+        """Return string representation."""
+        return ", ".join(self._map.keys())
 
     def __iter__(self):
         """Iterate self."""
