@@ -27,7 +27,7 @@ class JSONField(pw.Field):
         json_dumps: t.Callable = None,
         json_loads: t.Callable = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """Initialize the serializer."""
         self._json_dumps = json_dumps or json.dumps
@@ -93,9 +93,13 @@ class Choices:
         self._map = dict([(n, v) for v, n in self._choices])
         self._rmap = dict(self._choices)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return string representation."""
         return ", ".join(self._map.keys())
+
+    def __repr__(self) -> str:
+        """Return string representation."""
+        return f"<Choices: {self}>"
 
     def __iter__(self):
         """Iterate self."""
