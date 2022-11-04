@@ -85,13 +85,10 @@ class Plugin(BasePlugin):
                     router.create(name, auto and [m for m in self.manager.models])
 
             @app.manage
-            def peewee_rollback(name: str = None):
-                """Rollback a migration.
-
-                :param name: Migration name (actually it always should be a last one)
-                """
+            def peewee_rollback():
+                """Rollback the latest migration."""
                 with manager.allow_sync():
-                    router.rollback(name)
+                    router.rollback()
 
             @app.manage
             def peewee_list():
