@@ -1,6 +1,6 @@
 """Support Peewee ORM for Muffin framework."""
 
-from typing import Callable, Optional
+from typing import Callable, Optional, Type  # py37, py38: Type
 
 from aio_databases.database import ConnectionContext, Database, TransactionContext
 from muffin import Application
@@ -55,7 +55,7 @@ class Plugin(BasePlugin):
             manager.register(model)
         self.manager = manager
         self.database = manager.aio_database
-        self.Model: type[AIOModel] = self.manager.Model
+        self.Model: Type[AIOModel] = self.manager.Model
 
         if self.cfg.migrations_enabled:
             router = Router(manager.pw_database, migrate_dir=self.cfg.migrations_path)
@@ -130,7 +130,7 @@ class Plugin(BasePlugin):
         """Disconnect the database."""
         await self.database.disconnect()
 
-    def register(self, Model: type[TVModel]) -> type[TVModel]:
+    def register(self, Model: Type[TVModel]) -> Type[TVModel]:
         """Register a model with self manager."""
         return self.manager.register(Model)
 
@@ -140,11 +140,11 @@ class Plugin(BasePlugin):
     def transaction(self, *params, **opts) -> TransactionContext:
         return self.database.transaction(*params, **opts)
 
-    async def create_tables(self, *Models: type[Model]):
+    async def create_tables(self, *Models: Type[Model]):
         """Create SQL tables."""
         await self.manager.create_tables(*(Models or self.manager.models))
 
-    async def drop_tables(self, *Models: type[Model]):
+    async def drop_tables(self, *Models: Type[Model]):
         """Drop SQL tables."""
         await self.manager.drop_tables(*(Models or self.manager.models))
 
