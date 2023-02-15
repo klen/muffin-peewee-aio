@@ -1,7 +1,7 @@
 """Custom fields/properties."""
 
 import json
-from typing import Union
+from typing import Optional, Union
 
 import peewee as pw
 
@@ -26,8 +26,8 @@ class JSONField(pw.Field):
 
     def __init__(
         self,
-        json_dumps: TJSONDump | None = None,
-        json_loads: TJSONLoad | None = None,
+        json_dumps: Optional[TJSONDump] = None,
+        json_loads: Optional[TJSONLoad] = None,
         *args,
         **kwargs,
     ):
