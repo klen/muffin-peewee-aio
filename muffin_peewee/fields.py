@@ -6,7 +6,7 @@ from typing import Optional, Union
 import peewee as pw
 
 try:
-    from functools import cached_property
+    from functools import cached_property  # type: ignore # XXX: py37
 except ImportError:
     from cached_property import cached_property  # type: ignore # XXX: py37
 
