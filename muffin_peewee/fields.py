@@ -1,7 +1,7 @@
 """Custom fields/properties."""
 
 import json
-import typing as t
+from typing import Union
 
 import peewee as pw
 
@@ -15,6 +15,8 @@ try:
 except ImportError:
     Json = JsonLookup = None
 
+from .types import TChoice, TChoices, TJSONDump, TJSONLoad
+
 
 class JSONField(pw.Field):
 
@@ -24,8 +26,8 @@ class JSONField(pw.Field):
 
     def __init__(
         self,
-        json_dumps: t.Callable = None,
-        json_loads: t.Callable = None,
+        json_dumps: TJSONDump | None = None,
+        json_loads: TJSONLoad | None = None,
         *args,
         **kwargs,
     ):
@@ -76,22 +78,22 @@ class Choices:
 
     """Model's choices helper."""
 
-    __slots__ = "_choices", "_map", "_rmap"
+    __slots__ = "_map", "_rmap"
 
-    def __init__(self, choices, *args):
+    def __init__(self, choices: Union[TChoices, TChoice], *args: TChoice):
         """Parse provided choices."""
         if isinstance(choices, dict):
             choices = [(value, name) for name, value in choices.items()]
 
-        elif args:
+        elif not isinstance(choices, list):
             choices = [choices, *args]
 
-        self._choices = [
+        normilized = [
             (choice, choice) if isinstance(choice, str) else choice
             for choice in choices
         ]
-        self._map = dict([(n, v) for v, n in self._choices])
-        self._rmap = dict(self._choices)
+        self._map = dict([(n, v) for v, n in normilized])
+        self._rmap = dict(normilized)
 
     def __str__(self) -> str:
         """Return string representation."""
@@ -103,13 +105,13 @@ class Choices:
 
     def __iter__(self):
         """Iterate self."""
-        return iter(self._choices)
+        return iter(self._rmap.items())
 
-    def __getattr__(self, name, default=None):
+    def __getattr__(self, name: str, default=None):
         """Get choice value by name."""
         return self._map.get(name, default)
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str):
         """Get value by name."""
         return self._map[name]
 

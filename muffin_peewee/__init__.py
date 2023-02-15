@@ -1,13 +1,14 @@
 """Support Peewee ORM for Muffin framework."""
 
-import typing as t
+from typing import Callable
 
-import muffin
 from aio_databases.database import ConnectionContext, Database, TransactionContext
+from muffin import Application
 from muffin.plugins import BasePlugin
 from peewee import Model
-from peewee_aio.manager import TMODEL, Manager
+from peewee_aio.manager import Manager
 from peewee_aio.model import AIOModel
+from peewee_aio.types import TVModel
 from peewee_migrate import Router
 
 from .fields import Choices, JSONField
@@ -41,13 +42,13 @@ class Plugin(BasePlugin):
         "migrations_path": "migrations",
     }
 
-    router: Router = None
+    router: Router
     manager: Manager = Manager(
         "dummy://localhost"
     )  # Dummy manager for support registration
     database: Database
 
-    def setup(self, app: muffin.Application, **options):
+    def setup(self, app: Application, **options):
         """Init the plugin."""
         super().setup(app, **options)
 
@@ -57,7 +58,7 @@ class Plugin(BasePlugin):
             manager.register(model)
         self.manager = manager
         self.database = manager.aio_database
-        self.Model: t.Type[AIOModel] = self.manager.Model
+        self.Model: type[AIOModel] = self.manager.Model
 
         if self.cfg.migrations_enabled:
             router = Router(manager.pw_database, migrate_dir=self.cfg.migrations_path)
@@ -107,7 +108,7 @@ class Plugin(BasePlugin):
                     self.router.clear()
 
             @app.manage
-            def peewee_merge(name: str = "initial", clear: bool = False):
+            def peewee_merge(name: str = "initial"):
                 """Merge all migrations into one."""
                 with manager.allow_sync():
                     self.router.merge(name)
@@ -132,7 +133,7 @@ class Plugin(BasePlugin):
         """Disconnect the database."""
         await self.database.disconnect()
 
-    def register(self, Model: t.Type[TMODEL]) -> t.Type[TMODEL]:
+    def register(self, Model: type[TVModel]) -> type[TVModel]:
         """Register a model with self manager."""
         return self.manager.register(Model)
 
@@ -142,15 +143,15 @@ class Plugin(BasePlugin):
     def transaction(self, *params, **opts) -> TransactionContext:
         return self.database.transaction(*params, **opts)
 
-    async def create_tables(self, *Models: t.Type[Model]):
+    async def create_tables(self, *Models: type[Model]):
         """Create SQL tables."""
         await self.manager.create_tables(*(Models or self.manager.models))
 
-    async def drop_tables(self, *Models: t.Type[Model]):
+    async def drop_tables(self, *Models: type[Model]):
         """Drop SQL tables."""
         await self.manager.drop_tables(*(Models or self.manager.models))
 
-    def get_middleware(self) -> t.Callable:
+    def get_middleware(self) -> Callable:
         """Generate a middleware to manage connection/transaction."""
 
         async def middleware(handler, request, receive, send):  # type: ignore
