@@ -6,9 +6,9 @@ from typing import Union
 import peewee as pw
 
 try:
-    from functools import cached_property  # type: ignore
+    from functools import cached_property
 except ImportError:
-    from cached_property import cached_property  # type: ignore # XXX: Python 3.7
+    from cached_property import cached_property  # type: ignore # XXX: py37
 
 try:
     from playhouse.postgres_ext import Json, JsonLookup

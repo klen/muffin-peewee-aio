@@ -1,6 +1,6 @@
 """Support Peewee ORM for Muffin framework."""
 
-from typing import Callable
+from typing import Callable, Optional
 
 from aio_databases.database import ConnectionContext, Database, TransactionContext
 from muffin import Application
@@ -11,7 +11,7 @@ from peewee_aio.model import AIOModel
 from peewee_aio.types import TVModel
 from peewee_migrate import Router
 
-from .fields import Choices, JSONField
+from .fields import Choices, JSONField  # noqa
 
 __version__ = "0.6.4"
 __project__ = "muffin-peewee-aio"
@@ -20,9 +20,6 @@ __license__ = "MIT"
 
 
 __all__ = "Plugin", "JSONField", "Choices"
-
-
-assert JSONField and Choices
 
 
 class Plugin(BasePlugin):
@@ -66,7 +63,7 @@ class Plugin(BasePlugin):
 
             # Register migration commands
             @app.manage
-            def peewee_migrate(name: str = None, fake: bool = False):
+            def peewee_migrate(name: Optional[str] = None, fake: bool = False):
                 """Run application's migrations.
 
                 :param name: Choose a migration' name
@@ -154,13 +151,13 @@ class Plugin(BasePlugin):
     def get_middleware(self) -> Callable:
         """Generate a middleware to manage connection/transaction."""
 
-        async def middleware(handler, request, receive, send):  # type: ignore
+        async def middleware(handler, request, receive, send):
             async with self.connection():
                 return await handler(request, receive, send)
 
         if self.cfg.auto_transaction:
 
-            async def middleware(handler, request, receive, send):  # noqa
+            async def middleware(handler, request, receive, send):
                 async with self.connection():
                     async with self.transaction():
                         return await handler(request, receive, send)
