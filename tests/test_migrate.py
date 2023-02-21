@@ -1,10 +1,10 @@
 async def test_cli(app, db):
-    assert "peewee_create" in app.manage.commands
-    assert "peewee_migrate" in app.manage.commands
-    assert "peewee_rollback" in app.manage.commands
-    assert "peewee_list" in app.manage.commands
-    assert "peewee_clear" in app.manage.commands
-    assert "peewee_merge" in app.manage.commands
+    assert "peewee-create" in app.manage.commands
+    assert "peewee-migrate" in app.manage.commands
+    assert "peewee-rollback" in app.manage.commands
+    assert "peewee-list" in app.manage.commands
+    assert "peewee-clear" in app.manage.commands
+    assert "peewee-merge" in app.manage.commands
 
 
 async def test_migrations(db, tmpdir, transaction):

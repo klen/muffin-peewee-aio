@@ -129,32 +129,32 @@ Migrations
 
 Create migrations: ::
 
-    $ muffin example:app peewee_create [NAME] [--auto]
+    $ muffin example:app peewee-create [NAME] [--auto]
 
 
 Run migrations: ::
 
-    $ muffin example:app peewee_migrate [NAME] [--fake]
+    $ muffin example:app peewee-migrate [NAME] [--fake]
 
 
 Rollback migrations: ::
 
-    $ muffin example:app peewee_rollback [NAME]
+    $ muffin example:app peewee-rollback [NAME]
 
 
 List migrations: ::
 
-    $ muffin example:app peewee_list
+    $ muffin example:app peewee-list
 
 
 Clear migrations from DB: ::
 
-    $ muffin example:app peewee_clear
+    $ muffin example:app peewee-clear
 
 
 Merge migrations: ::
 
-    $ muffin example:app peewee_merge
+    $ muffin example:app peewee-merge
 
 
 .. _bugtracker:
