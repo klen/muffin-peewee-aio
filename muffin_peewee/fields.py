@@ -1,7 +1,7 @@
 """Custom fields/properties."""
 
 import json
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import peewee as pw
 
@@ -15,7 +15,7 @@ try:
 except ImportError:
     Json = JsonLookup = None
 
-from .types import TChoice, TChoices, TJSONDump, TJSONLoad
+from .types import TJSONDump, TJSONLoad
 
 
 class JSONField(pw.Field):
@@ -80,20 +80,17 @@ class Choices:
 
     __slots__ = "_map", "_rmap"
 
-    def __init__(self, choices: Union[TChoices, TChoice], *args: TChoice):
+    def __init__(self, choice: Union[Dict[str, Any], str], *choices: str):
         """Parse provided choices."""
-        if isinstance(choices, dict):
-            choices = [(value, name) for name, value in choices.items()]
+        pw_choices = (
+            [(value, name) for name, value in choice.items()]
+            if isinstance(choice, dict)
+            else [(choice, choice)]
+        )
+        pw_choices.extend([(choice, choice) for choice in choices])
 
-        elif not isinstance(choices, list):
-            choices = [choices, *args]
-
-        normilized = [
-            (choice, choice) if isinstance(choice, str) else choice
-            for choice in choices
-        ]
-        self._map = dict([(n, v) for v, n in normilized])
-        self._rmap = dict(normilized)
+        self._map = dict([(n, v) for v, n in pw_choices])
+        self._rmap = dict(pw_choices)
 
     def __str__(self) -> str:
         """Return string representation."""
@@ -121,6 +118,6 @@ class Choices:
 
     def __deepcopy__(self, memo):
         """Deep copy self."""
-        result = Choices(self._map.copy())
+        result = Choices(self._map)
         memo[id(self)] = result
         return result
