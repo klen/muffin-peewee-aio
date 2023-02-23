@@ -13,7 +13,7 @@ from peewee_migrate import Router
 
 from .fields import Choices, JSONField  # noqa
 
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 __project__ = "muffin-peewee-aio"
 __author__ = "Kirill Klenov <horneds@gmail.com>"
 __license__ = "MIT"
