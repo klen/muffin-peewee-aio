@@ -1,21 +1,21 @@
 """Custom fields/properties."""
 
+from __future__ import annotations
+
 import json
-from typing import Any, Dict, List, Optional, Union
+from contextlib import suppress
+from functools import cached_property
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import peewee as pw
-
-try:
-    from functools import cached_property  # type: ignore # XXX: py37
-except ImportError:
-    from cached_property import cached_property  # type: ignore # XXX: py37
 
 try:
     from playhouse.postgres_ext import Json, JsonLookup
 except ImportError:
     Json = JsonLookup = None
 
-from .types import TJSONDump, TJSONLoad
+if TYPE_CHECKING:
+    from .types import TJSONDump, TJSONLoad
 
 
 class JSONField(pw.Field):
@@ -53,10 +53,8 @@ class JSONField(pw.Field):
     def python_value(self, value):
         """Deserialize value from DB."""
         if value is not None and self.field_type == "text":
-            try:
+            with suppress(TypeError, ValueError):
                 return self._json_loads(value)
-            except (TypeError, ValueError):
-                pass
 
         return value
 
@@ -89,7 +87,7 @@ class Choices:
         )
         pw_choices.extend([(choice, choice) for choice in choices])
 
-        self._map = dict([(n, v) for v, n in pw_choices])
+        self._map = {n: v for v, n in pw_choices}
         self._rmap = dict(pw_choices)
 
     def __str__(self) -> str:

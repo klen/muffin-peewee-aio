@@ -1,23 +1,19 @@
 """Support Peewee ORM for Muffin framework."""
 
-from typing import Callable, Optional, Type  # py37, py38: Type
+from typing import TYPE_CHECKING, Callable, Optional, Type  # py37, py38: Type
 
 from aio_databases.database import ConnectionContext, Database, TransactionContext
-from muffin import Application
 from muffin.plugins import BasePlugin
-from peewee import Model
 from peewee_aio.manager import Manager
-from peewee_aio.model import AIOModel
-from peewee_aio.types import TVModel
 from peewee_migrate import Router
 
-from .fields import Choices, JSONField  # noqa
+from .fields import Choices, JSONField
 
-__version__ = "0.7.1"
-__project__ = "muffin-peewee-aio"
-__author__ = "Kirill Klenov <horneds@gmail.com>"
-__license__ = "MIT"
-
+if TYPE_CHECKING:
+    from muffin import Application
+    from peewee import Model
+    from peewee_aio.model import AIOModel
+    from peewee_aio.types import TVModel
 
 __all__ = "Plugin", "JSONField", "Choices"
 
@@ -41,11 +37,11 @@ class Plugin(BasePlugin):
 
     router: Router
     manager: Manager = Manager(
-        "dummy://localhost"
+        "dummy://localhost",
     )  # Dummy manager for support registration
     database: Database
 
-    def setup(self, app: Application, **options):
+    def setup(self, app: "Application", **options):
         """Init the plugin."""
         super().setup(app, **options)
 
@@ -63,7 +59,7 @@ class Plugin(BasePlugin):
 
             # Register migration commands
             @app.manage
-            def peewee_migrate(name: Optional[str] = None, fake: bool = False):
+            def peewee_migrate(name: Optional[str] = None, *, fake: bool = False):
                 """Run application's migrations.
 
                 :param name: Choose a migration' name
@@ -73,14 +69,14 @@ class Plugin(BasePlugin):
                     router.run(name, fake=fake)
 
             @app.manage
-            def peewee_create(name: str = "auto", auto: bool = False):
+            def peewee_create(name: str = "auto", *, auto: bool = False):
                 """Create a migration.
 
                 :param name: Set name of migration [auto]
                 :param auto: Track changes and setup migrations automatically
                 """
                 with manager.allow_sync():
-                    router.create(name, auto and [m for m in self.manager.models])
+                    router.create(name, auto and list(self.manager.models))
 
             @app.manage
             def peewee_rollback():
@@ -130,9 +126,9 @@ class Plugin(BasePlugin):
         """Disconnect the database."""
         await self.database.disconnect()
 
-    def register(self, Model: Type[TVModel]) -> Type[TVModel]:
+    def register(self, model_cls: Type["TVModel"]) -> Type["TVModel"]:
         """Register a model with self manager."""
-        return self.manager.register(Model)
+        return self.manager.register(model_cls)
 
     def connection(self, *params, **opts) -> ConnectionContext:
         return self.database.connection(*params, **opts)
@@ -140,13 +136,13 @@ class Plugin(BasePlugin):
     def transaction(self, *params, **opts) -> TransactionContext:
         return self.database.transaction(*params, **opts)
 
-    async def create_tables(self, *Models: Type[Model]):
+    async def create_tables(self, *models_cls: Type["Model"]):
         """Create SQL tables."""
-        await self.manager.create_tables(*(Models or self.manager.models))
+        await self.manager.create_tables(*(models_cls or self.manager.models))
 
-    async def drop_tables(self, *Models: Type[Model]):
+    async def drop_tables(self, *models_cls: Type["Model"]):
         """Drop SQL tables."""
-        await self.manager.drop_tables(*(Models or self.manager.models))
+        await self.manager.drop_tables(*(models_cls or self.manager.models))
 
     def get_middleware(self) -> Callable:
         """Generate a middleware to manage connection/transaction."""

@@ -1,0 +1,87 @@
+[project]
+name = "muffin-peewee-aio"
+version = "0.7.1"
+description = "Peewee-AIO integration for Muffin framework"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = {"text" = "MIT License"}
+authors = [{ name = "Kirill Klenov", email = "horneds@gmail.com" }]
+keywords = ["peewee", "sql", "orm", "asyncio", "muffin"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Framework :: AsyncIO",
+]
+dependencies = [
+  "muffin >= 0.92",
+  "peewee >= 3",
+  "peewee-aio >= 0.16.3",
+  "peewee-migrate >= 1.6.6",
+]
+
+[project.urls]
+homepage = "https://github.com/klen/muffin-peewee"
+repository = "https://github.com/klen/muffin-peewee"
+
+[project.optional-dependencies]
+tests = [
+  "pytest",
+  "pytest-aio",
+  "pytest-mypy",
+  "aiosqlite",
+  "uvicorn",
+  "types-setuptools",
+  "ruff",
+]
+dev = ["pre-commit", "refurb", "bump2version"]
+asyncpg = ["asyncpg"]
+aiopg = ["aiopg"]
+aiomysql = ["aiomysql"]
+aiosqlite = ["aiosqlite"]
+
+[tool.setuptools]
+packages = ['muffin_peewee']
+
+[tool.setuptools.package-data]
+muffin_peewee = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "-xsv"
+log_cli = true
+
+[tool.mypy]
+packages = ["muffin_peewee"]
+install_types = true
+non_interactive = true
+ignore_missing_imports = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py38,py39,py310,py311,pypy39
+
+[testenv]
+deps = -e .[tests]
+commands =
+	pytest --mypy tests
+
+[testenv:pypy39]
+deps = -e .[tests]
+commands =
+	pytest tests
+"""
+
+[tool.ruff]
+fix = true
+line-length = 100
+target-version = "py38"
+exclude = [".venv", "docs", "examples"]
+select = ["ALL"]
+ignore = ["D", "UP", "ANN", "DJ", "EM", "RSE", "SLF", "RET", "S101", "PLR2004", "PLR0912", "N804", "A003", "TRY003"]
