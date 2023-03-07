@@ -51,6 +51,8 @@ async def test_enum_field(db, transaction):
         data = peewee.CharField()
         enum = EnumField(MyEnum)
 
+    assert Test.enum.choices == [("A", "a"), ("B", "b"), ("C", "c")]
+
     await Test.create_table()
 
     inst = Test(data="some", enum=MyEnum.a)

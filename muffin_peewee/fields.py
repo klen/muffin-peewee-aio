@@ -80,6 +80,10 @@ class EnumField(pw.CharField):
     def __init__(self, enum: EnumMeta, *args, **kwargs):
         """Initialize the field."""
         self.enum = enum
+        kwargs.setdefault(
+            "choices",
+            [(e.value, e.name) for e in enum],  # type: ignore[var-annotated]
+        )
         super().__init__(*args, **kwargs)
 
     def db_value(self, value) -> Optional[str]:
