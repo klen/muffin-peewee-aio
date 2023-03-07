@@ -19,7 +19,7 @@ async def test_migrations(db, tmpdir, transaction):
 
         # Create migration
         name = db.router.create("test")
-        assert "001_test" == name
+        assert name == "001_test"
         assert db.router.todo
         assert not db.router.done
         assert db.router.diff
@@ -30,4 +30,4 @@ async def test_migrations(db, tmpdir, transaction):
         assert not db.router.diff
 
         name = db.router.create()
-        assert "002_auto" == name
+        assert name == "002_auto"

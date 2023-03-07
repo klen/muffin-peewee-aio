@@ -3,36 +3,36 @@
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture()
 def aiolib():
     # Only asyncio supported for now
-    return ('asyncio', {'use_uvloop': False})
+    return ("asyncio", {"use_uvloop": False})
 
 
-@pytest.fixture(scope='session', autouse=True)
-def setup_logging():
+@pytest.fixture(scope="session", autouse=True)
+def _setup_logging():
     import logging
 
-    logger = logging.getLogger('peewee')
+    logger = logging.getLogger("peewee")
     logger.setLevel(logging.DEBUG)
 
 
-@pytest.fixture
+@pytest.fixture()
 def app():
     """Create a muffin application."""
     import muffin
 
-    return muffin.Application(peewee_connection='sqlite:///:memory:')
+    return muffin.Application(peewee_connection="sqlite:///:memory:")
 
 
-@pytest.fixture
+@pytest.fixture()
 async def db(app):
     import muffin_peewee
 
     return muffin_peewee.Plugin(app)
 
 
-@pytest.fixture
+@pytest.fixture()
 async def transaction(db):
     """Clean changes after test."""
     async with db.connection():

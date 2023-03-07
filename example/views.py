@@ -9,7 +9,7 @@ from . import app
 from .models import DataItem
 
 
-@app.route('/')
+@app.route("/")
 async def list(request):
     """List items."""
     objects = await DataItem.select()
@@ -24,17 +24,17 @@ async def list(request):
     return template
 
 
-@app.route('/generate')
+@app.route("/generate")
 async def generate(request):
     """Create a new DataItem."""
     await DataItem.create(
-        content=''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
+        content="".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20)),
     )
-    return muffin.ResponseRedirect('/')
+    return muffin.ResponseRedirect("/")
 
 
-@app.route('/clean')
+@app.route("/clean")
 async def clean(request):
     """Create a new DataItem."""
     await DataItem.delete()
-    return muffin.ResponseRedirect('/')
+    return muffin.ResponseRedirect("/")
