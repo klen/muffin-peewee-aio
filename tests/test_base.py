@@ -36,7 +36,7 @@ async def test_delayed_registration(app):
 
     assert TestModel._manager
     assert TestModel._meta.database
-    assert TestModel._meta.database.database == ''
+    assert TestModel._meta.database.database == ""
 
     manager = TestModel._manager
 
@@ -44,4 +44,4 @@ async def test_delayed_registration(app):
 
     assert TestModel._manager is not manager
     assert TestModel._meta.database
-    assert TestModel._meta.database.database == ':memory:'
+    assert TestModel._meta.database.database == ":memory:"

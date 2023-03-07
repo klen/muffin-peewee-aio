@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from contextlib import suppress
-from enum import Enum, EnumType
+from enum import EnumType
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
@@ -82,14 +82,14 @@ class EnumField(pw.CharField):
         self.enum = enum
         super().__init__(*args, **kwargs)
 
-    def db_value(self, value: Optional[EnumType]) -> Optional[str]:
+    def db_value(self, value) -> Optional[str]:
         """Convert python value to database."""
         if value is None:
             return value
 
         return value.value
 
-    def python_value(self, value: Optional[str]) -> Optional[EnumType]:
+    def python_value(self, value: Optional[str]):
         """Convert database value to python."""
         if value is None:
             return value
@@ -103,12 +103,12 @@ class Choices:
 
     __slots__ = "_map", "_rmap"
 
-    def __init__(self, choice: Union[Dict[str, Any], Enum, str], *choices: str):
+    def __init__(self, choice: Union[Dict[str, Any], EnumType, str], *choices: str):
         """Parse provided choices."""
         pw_choices = (
             [(value, name) for name, value in choice.items()]
             if isinstance(choice, dict)
-            else [(e.value, e.name) for e in choice]
+            else [(e.value, e.name) for e in choice]  # type: ignore[var-annotated]
             if isinstance(choice, EnumType)
             else [(choice, choice)]
         )
