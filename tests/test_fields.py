@@ -1,3 +1,5 @@
+from enum import Enum
+
 import peewee
 
 
@@ -8,8 +10,6 @@ async def test_json_field(db, transaction):
     class Test(db.Model):
         data = peewee.CharField()
         json = JSONField(default={})
-
-    manager = db.manager
 
     await Test.create_table()
 
@@ -38,6 +38,29 @@ async def test_uuid(db, transaction):
     assert await M.get() == m
 
 
+async def test_enum_field(db, transaction):
+    from muffin_peewee import EnumField
+
+    class MyEnum(Enum):
+        a = "A"
+        b = "B"
+        c = "C"
+
+    @db.register
+    class Test(db.Model):
+        data = peewee.CharField()
+        enum = EnumField(MyEnum)
+
+    await Test.create_table()
+
+    inst = Test(data="some", enum=MyEnum.a)
+    inst = await inst.save()
+    assert inst.enum == MyEnum.a
+
+    test = await Test.get()
+    assert test.enum == MyEnum.a
+
+
 async def test_choices(db):
     from muffin_peewee import Choices
 
@@ -54,6 +77,18 @@ async def test_choices(db):
     assert list(choices) == [("a", "a"), ("b", "b"), ("c", "c")]
 
     choices = Choices({"a": "A", "b": "B", "c": "C"})
+    assert choices.a == "A"
+    assert choices["a"] == "A"
+    assert choices("A") == "a"
+
+    assert list(choices) == [("A", "a"), ("B", "b"), ("C", "c")]
+
+    class MyEnum(Enum):
+        a = "A"
+        b = "B"
+        c = "C"
+
+    choices = Choices(MyEnum)
     assert choices.a == "A"
     assert choices["a"] == "A"
     assert choices("A") == "a"

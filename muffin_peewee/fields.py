@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from contextlib import suppress
+from enum import Enum, EnumType
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
@@ -72,17 +73,43 @@ class JSONField(pw.Field):
         return value
 
 
+class EnumField(pw.CharField):
+
+    """Implement enum field."""
+
+    def __init__(self, enum: EnumType, *args, **kwargs):
+        """Initialize the field."""
+        self.enum = enum
+        super().__init__(*args, **kwargs)
+
+    def db_value(self, value: Optional[EnumType]) -> Optional[str]:
+        """Convert python value to database."""
+        if value is None:
+            return value
+
+        return value.value
+
+    def python_value(self, value: Optional[str]) -> Optional[EnumType]:
+        """Convert database value to python."""
+        if value is None:
+            return value
+
+        return self.enum(value)
+
+
 class Choices:
 
     """Model's choices helper."""
 
     __slots__ = "_map", "_rmap"
 
-    def __init__(self, choice: Union[Dict[str, Any], str], *choices: str):
+    def __init__(self, choice: Union[Dict[str, Any], Enum, str], *choices: str):
         """Parse provided choices."""
         pw_choices = (
             [(value, name) for name, value in choice.items()]
             if isinstance(choice, dict)
+            else [(e.value, e.name) for e in choice]
+            if isinstance(choice, EnumType)
             else [(choice, choice)]
         )
         pw_choices.extend([(choice, choice) for choice in choices])
