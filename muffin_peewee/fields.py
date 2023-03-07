@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from contextlib import suppress
-from enum import EnumType
+from enum import EnumMeta
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
@@ -77,7 +77,7 @@ class EnumField(pw.CharField):
 
     """Implement enum field."""
 
-    def __init__(self, enum: EnumType, *args, **kwargs):
+    def __init__(self, enum: EnumMeta, *args, **kwargs):
         """Initialize the field."""
         self.enum = enum
         super().__init__(*args, **kwargs)
@@ -103,13 +103,13 @@ class Choices:
 
     __slots__ = "_map", "_rmap"
 
-    def __init__(self, choice: Union[Dict[str, Any], EnumType, str], *choices: str):
+    def __init__(self, choice: Union[Dict[str, Any], EnumMeta, str], *choices: str):
         """Parse provided choices."""
         pw_choices = (
             [(value, name) for name, value in choice.items()]
             if isinstance(choice, dict)
             else [(e.value, e.name) for e in choice]  # type: ignore[var-annotated]
-            if isinstance(choice, EnumType)
+            if isinstance(choice, EnumMeta)
             else [(choice, choice)]
         )
         pw_choices.extend([(choice, choice) for choice in choices])
