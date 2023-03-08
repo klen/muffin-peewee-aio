@@ -6,9 +6,10 @@ import json
 from contextlib import suppress
 from enum import EnumMeta
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, Union
 
 import peewee as pw
+from asgi_tools.types import TV
 
 try:
     from playhouse.postgres_ext import Json, JsonLookup
@@ -73,9 +74,9 @@ class JSONField(pw.Field):
         return value
 
 
-class EnumField(pw.CharField):
+class EnumMixin(Generic[TV]):
 
-    """Implement enum field."""
+    """Implement enum mixin."""
 
     def __init__(self, enum: EnumMeta, *args, **kwargs):
         """Initialize the field."""
@@ -86,19 +87,29 @@ class EnumField(pw.CharField):
         )
         super().__init__(*args, **kwargs)
 
-    def db_value(self, value) -> Optional[str]:
+    def db_value(self, value) -> Optional[TV]:
         """Convert python value to database."""
         if value is None:
             return value
 
         return value.value
 
-    def python_value(self, value: Optional[str]):
+    def python_value(self, value: Optional[TV]):
         """Convert database value to python."""
         if value is None:
             return value
 
         return self.enum(value)
+
+
+class StrEnumField(EnumMixin[str], pw.CharField):
+
+    """Implement enum field."""
+
+
+class IntEnumField(EnumMixin[int], pw.IntegerField):
+
+    """Implement enum field."""
 
 
 class Choices:

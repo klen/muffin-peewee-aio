@@ -39,28 +39,37 @@ async def test_uuid(db, transaction):
 
 
 async def test_enum_field(db, transaction):
-    from muffin_peewee import EnumField
+    from muffin_peewee import IntEnumField, StrEnumField
 
-    class MyEnum(Enum):
+    class StrEnum(Enum):
         a = "A"
         b = "B"
         c = "C"
 
+    class IntEnum(Enum):
+        a = 1
+        b = 2
+        c = 3
+
     @db.register
     class Test(db.Model):
         data = peewee.CharField()
-        enum = EnumField(MyEnum)
+        str_enum = StrEnumField(StrEnum)
+        int_enum = IntEnumField(IntEnum)
 
-    assert Test.enum.choices == [("A", "a"), ("B", "b"), ("C", "c")]
+    assert Test.str_enum.choices == [("A", "a"), ("B", "b"), ("C", "c")]
+    assert Test.int_enum.choices == [(1, "a"), (2, "b"), (3, "c")]
 
     await Test.create_table()
 
-    inst = Test(data="some", enum=MyEnum.a)
+    inst = Test(data="some", str_enum=StrEnum.a, int_enum=IntEnum.a)
     inst = await inst.save()
-    assert inst.enum == MyEnum.a
+    assert inst.str_enum == StrEnum.a
+    assert inst.int_enum == IntEnum.a
 
     test = await Test.get()
-    assert test.enum == MyEnum.a
+    assert test.str_enum == StrEnum.a
+    assert test.int_enum == IntEnum.a
 
 
 async def test_choices(db):

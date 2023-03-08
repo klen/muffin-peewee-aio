@@ -7,7 +7,7 @@ from muffin.plugins import BasePlugin
 from peewee_aio.manager import Manager
 from peewee_migrate import Router
 
-from .fields import Choices, EnumField, JSONField
+from .fields import Choices, IntEnumField, JSONField, StrEnumField
 
 if TYPE_CHECKING:
     from muffin import Application
@@ -15,7 +15,9 @@ if TYPE_CHECKING:
     from peewee_aio.model import AIOModel
     from peewee_aio.types import TVModel
 
-__all__ = "Plugin", "JSONField", "Choices", "EnumField"
+__all__ = "Plugin", "JSONField", "Choices", "StrEnumField", "IntEnumField", "EnumField"
+
+EnumField = StrEnumField
 
 
 class Plugin(BasePlugin):
