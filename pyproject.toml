@@ -1,6 +1,6 @@
 [project]
 name = "muffin-peewee-aio"
-version = "0.9.5"
+version = "0.9.6"
 description = "Peewee-AIO integration for Muffin framework"
 readme = "README.rst"
 requires-python = ">=3.8"
