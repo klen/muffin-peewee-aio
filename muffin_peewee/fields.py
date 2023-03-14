@@ -112,6 +112,14 @@ class IntEnumField(EnumMixin[int], pw.IntegerField):
     """Implement enum field."""
 
 
+class URLField(pw.CharField):
+
+    """Implement URL field.
+
+    The field is not validated, but it's just a placeholder for now.
+    """
+
+
 class Choices:
 
     """Model's choices helper."""
