@@ -2,6 +2,7 @@
 
 from typing import TYPE_CHECKING, Callable, Optional, Type  # py37, py38: Type
 
+import peewee as pw
 from aio_databases.database import ConnectionContext, Database, TransactionContext
 from muffin.plugins import BasePlugin, PluginNotInstalledError
 from peewee_aio.manager import Manager
@@ -57,13 +58,6 @@ class Plugin(BasePlugin):
         "dummy://localhost",
     )  # Dummy manager for support registration
     database: Database
-
-    @property
-    def Model(self) -> Type[AIOModel]:  # noqa: N802
-        if self.app is None:
-            raise PluginNotInstalledError
-
-        return self.manager.Model
 
     def setup(self, app: "Application", **options):
         """Init the plugin."""
@@ -159,11 +153,11 @@ class Plugin(BasePlugin):
     def transaction(self, *params, **opts) -> TransactionContext:
         return self.database.transaction(*params, **opts)
 
-    async def create_tables(self, *models_cls: Type["Model"]):
+    async def create_tables(self, *models_cls: Type[pw.Model]):
         """Create SQL tables."""
         await self.manager.create_tables(*(models_cls or self.manager.models))
 
-    async def drop_tables(self, *models_cls: Type["Model"]):
+    async def drop_tables(self, *models_cls: Type[pw.Model]):
         """Drop SQL tables."""
         await self.manager.drop_tables(*(models_cls or self.manager.models))
 
@@ -184,3 +178,10 @@ class Plugin(BasePlugin):
                     return await handler(request, receive, send)
 
         return middleware
+
+    @property
+    def Model(self) -> Type[AIOModel]:  # noqa: N802
+        if self.app is None:
+            raise PluginNotInstalledError
+
+        return self.manager.Model
