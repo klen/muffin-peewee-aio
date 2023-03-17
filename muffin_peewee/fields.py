@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from contextlib import suppress
-from enum import EnumMeta, EnumType
+from enum import EnumMeta
 from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, Union
 
 import peewee as pw
@@ -83,12 +83,12 @@ class EnumMixin(Generic[TV]):
         return self.enum(value)
 
 
-class StrEnumField(EnumMixin[str], pw.CharField, GenericField[EnumType]):
+class StrEnumField(EnumMixin[str], pw.CharField, GenericField[EnumMeta]):
 
     """Implement enum field."""
 
 
-class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[EnumType]):
+class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[EnumMeta]):
 
     """Implement enum field."""
 
