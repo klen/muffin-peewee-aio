@@ -33,6 +33,11 @@ async def db(app):
 
 
 @pytest.fixture()
+def model_cls(db):
+    return db.Model
+
+
+@pytest.fixture()
 async def transaction(db):
     """Clean changes after test."""
     async with db.connection():

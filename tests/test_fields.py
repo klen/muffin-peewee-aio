@@ -1,13 +1,15 @@
 from enum import Enum
+from typing import Type
 
 import peewee
+from peewee_aio import AIOModel
 
 
-async def test_json_field(db, transaction):
-    from muffin_peewee import JSONField
+async def test_json_field(db, transaction, model_cls: Type[AIOModel]):
+    from muffin_peewee import JSONLikeField as JSONField
 
     @db.register
-    class Test(db.Model):
+    class Test(model_cls):
         data = peewee.CharField()
         json = JSONField(default={})
 
@@ -21,11 +23,11 @@ async def test_json_field(db, transaction):
     assert test.json == {"key": "value"}
 
 
-async def test_uuid(db, transaction):
+async def test_uuid(db, transaction, model_cls: Type[AIOModel]):
     """Test for UUID in Sqlite."""
 
     @db.register
-    class M(db.Model):
+    class M(model_cls):
         data = peewee.UUIDField()
 
     await M.create_table()

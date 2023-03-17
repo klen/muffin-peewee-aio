@@ -4,27 +4,24 @@ from __future__ import annotations
 
 import json
 from contextlib import suppress
-from enum import EnumMeta
-from functools import cached_property
+from enum import EnumMeta, EnumType
 from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, Union
 
 import peewee as pw
-from asgi_tools.types import TV
-
-try:
-    from playhouse.postgres_ext import Json, JsonLookup
-except ImportError:
-    Json = JsonLookup = None
+from asgi_tools.types import TJSON, TV
+from peewee_aio.fields import GenericField
+from playhouse.postgres_ext import JSONField as PGJSONField
 
 if TYPE_CHECKING:
     from .types import TJSONDump, TJSONLoad
 
 
-class JSONField(pw.Field):
+class JSONLikeField(pw.Field, GenericField[TJSON]):
 
     """Implement JSON field."""
 
     unpack = False
+    field_type = "text"
 
     def __init__(
         self,
@@ -36,21 +33,7 @@ class JSONField(pw.Field):
         """Initialize the serializer."""
         self._json_dumps = json_dumps or json.dumps
         self._json_loads = json_loads or json.loads
-        super(JSONField, self).__init__(*args, **kwargs)
-
-    def __getitem__(self, value) -> JsonLookup:
-        """Lookup item in database."""
-        return JsonLookup(self, [value])
-
-    @cached_property
-    def field_type(self):
-        """Return database field type."""
-        database = self.model._meta.database
-        if isinstance(database, pw.Proxy):
-            database = database.obj
-        if Json and isinstance(database, pw.PostgresqlDatabase):
-            return "json"
-        return "text"
+        super().__init__(*args, **kwargs)
 
     def python_value(self, value):
         """Deserialize value from DB."""
@@ -65,13 +48,11 @@ class JSONField(pw.Field):
         if value is None:
             return value
 
-        if self.field_type == "text":
-            return self._json_dumps(value)
+        return self._json_dumps(value)
 
-        if not isinstance(value, Json):
-            return pw.Cast(self._json_dumps(value), "json")
 
-        return value
+class JSONPGField(PGJSONField, GenericField[TJSON]):
+    pass
 
 
 class EnumMixin(Generic[TV]):
@@ -102,17 +83,17 @@ class EnumMixin(Generic[TV]):
         return self.enum(value)
 
 
-class StrEnumField(EnumMixin[str], pw.CharField):
+class StrEnumField(EnumMixin[str], pw.CharField, GenericField[EnumType]):
 
     """Implement enum field."""
 
 
-class IntEnumField(EnumMixin[int], pw.IntegerField):
+class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[EnumType]):
 
     """Implement enum field."""
 
 
-class URLField(pw.CharField):
+class URLField(pw.CharField, GenericField[str]):
 
     """Implement URL field.
 
