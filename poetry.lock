@@ -671,14 +671,14 @@ files = [
 
 [[package]]
 name = "peewee-aio"
-version = "0.18.2"
+version = "1.0.0"
 description = "Async support for Peewee ORM"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "peewee_aio-0.18.2-py3-none-any.whl", hash = "sha256:15f21c9a57252423c3569406e7fb984346c45c3ccf291a39cfcb4bb8199fa7ae"},
-    {file = "peewee_aio-0.18.2.tar.gz", hash = "sha256:7eaa5d363cf6db389f81c1a94ca0c7a9249897e7bd670180c15353295e8d8f9a"},
+    {file = "peewee_aio-1.0.0-py3-none-any.whl", hash = "sha256:15dbe738ad38e7b81602a6cc8763d4ad1b9a9ccdb8ed19f3526e60922461311d"},
+    {file = "peewee_aio-1.0.0.tar.gz", hash = "sha256:e5f996a258d812c5b71f767213a7ec0ff8b351624bb531015f05829c95895019"},
 ]
 
 [package.dependencies]
@@ -1275,4 +1275,4 @@ asyncpg = ["asyncpg"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "8108b05710cd850de7abea18161f956eca80f16320dac6f3958ff4dcdf2e222c"
+content-hash = "0125592e3ec432e51341095d25fcef368d9123fae71d9dbd6e5e19df276bc116"

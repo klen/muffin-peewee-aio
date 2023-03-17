@@ -28,7 +28,7 @@ packages = [
 python = "^3.8"
 muffin = "^0"
 peewee = "^3"
-peewee-aio = "^0"
+peewee-aio = "^1"
 peewee-migrate = "^1"
 typing-extensions = { version = "*", python = "<3.11" }
 
