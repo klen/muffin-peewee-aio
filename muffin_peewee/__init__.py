@@ -3,8 +3,9 @@
 from typing import TYPE_CHECKING, Callable, Optional, Type  # py37, py38: Type
 
 from aio_databases.database import ConnectionContext, Database, TransactionContext
-from muffin.plugins import BasePlugin
+from muffin.plugins import BasePlugin, PluginNotInstalledError
 from peewee_aio.manager import Manager
+from peewee_aio.model import AIOModel
 from peewee_migrate import Router
 
 from .fields import (
@@ -18,8 +19,6 @@ from .fields import (
 
 if TYPE_CHECKING:
     from muffin import Application
-    from peewee import Model
-    from peewee_aio.model import AIOModel
     from peewee_aio.types import TVModel
 
 __all__ = (
@@ -59,6 +58,13 @@ class Plugin(BasePlugin):
     )  # Dummy manager for support registration
     database: Database
 
+    @property
+    def Model(self) -> Type[AIOModel]:  # noqa: N802
+        if self.app is None:
+            raise PluginNotInstalledError
+
+        return self.manager.Model
+
     def setup(self, app: "Application", **options):
         """Init the plugin."""
         super().setup(app, **options)
@@ -69,7 +75,6 @@ class Plugin(BasePlugin):
             manager.register(model)
         self.manager = manager
         self.database = manager.aio_database
-        self.Model: Type[AIOModel] = self.manager.Model
 
         if self.cfg.migrations_enabled:
             router = Router(manager.pw_database, migrate_dir=self.cfg.migrations_path)
