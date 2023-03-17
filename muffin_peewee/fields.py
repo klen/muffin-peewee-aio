@@ -87,16 +87,20 @@ class StrEnumField(EnumMixin[str], pw.CharField, GenericField[TV]):
 
     """Implement enum field."""
 
-    def __init__(self: StrEnumField[TV], enum: type[TV], **kwargs):
-        super().__init__(enum, **kwargs)
+    if TYPE_CHECKING:
+
+        def __init__(self: StrEnumField[TV], enum: type[TV], **kwargs):
+            ...
 
 
 class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[TV]):
 
     """Implement enum field."""
 
-    def __init__(self: IntEnumField[TV], enum: type[TV], **kwargs):
-        super().__init__(enum, **kwargs)
+    if TYPE_CHECKING:
+
+        def __init__(self: IntEnumField[TV], enum: type[TV], **kwargs):
+            ...
 
 
 class URLField(pw.CharField, GenericField[TV]):
@@ -106,21 +110,20 @@ class URLField(pw.CharField, GenericField[TV]):
     The field is not validated, but it's just a placeholder for now.
     """
 
-    @overload
-    def __init__(self: URLField[str], *args, null: Literal[False] = ..., **kwargs):
-        ...
+    if TYPE_CHECKING:
 
-    @overload
-    def __init__(
-        self: URLField[Optional[str]],
-        *args,
-        null: Literal[True] = ...,
-        **kwargs,
-    ):
-        ...
+        @overload
+        def __new__(cls, *args, null: Literal[False] = ..., **kwargs) -> URLField[str]:
+            ...
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        @overload
+        def __new__(
+            cls, *args, null: Literal[True] = ..., **kwargs
+        ) -> URLField[Optional[str]]:
+            ...
+
+        def __new__(cls, *args, **kwargs):
+            ...
 
 
 class Choices:
