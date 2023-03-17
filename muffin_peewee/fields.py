@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from contextlib import suppress
 from enum import EnumMeta
-from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Literal, Optional, Union, overload
 
 import peewee as pw
 from asgi_tools.types import TJSON, TV
@@ -16,12 +16,30 @@ if TYPE_CHECKING:
     from .types import TJSONDump, TJSONLoad
 
 
-class JSONLikeField(pw.Field, GenericField[TJSON]):
+class JSONLikeField(pw.Field, GenericField[TV]):
 
     """Implement JSON field."""
 
     unpack = False
     field_type = "text"
+
+    @overload
+    def __init__(
+        self: JSONLikeField[TJSON],
+        *args,
+        null: Literal[False] = ...,
+        **kwargs,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: JSONLikeField[Optional[TJSON]],
+        *args,
+        null: Literal[True] = ...,
+        **kwargs,
+    ):
+        ...
 
     def __init__(
         self,
@@ -51,8 +69,22 @@ class JSONLikeField(pw.Field, GenericField[TJSON]):
         return self._json_dumps(value)
 
 
-class JSONPGField(PGJSONField, GenericField[TJSON]):
-    pass
+class JSONPGField(PGJSONField, GenericField[TV]):
+    @overload
+    def __init__(self: JSONPGField[TJSON], *args, null: Literal[False] = ..., **kwargs):
+        ...
+
+    @overload
+    def __init__(
+        self: JSONPGField[Optional[TJSON]],
+        *args,
+        null: Literal[True] = ...,
+        **kwargs,
+    ):
+        ...
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class EnumMixin(Generic[TV]):
@@ -93,12 +125,28 @@ class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[EnumMeta]):
     """Implement enum field."""
 
 
-class URLField(pw.CharField, GenericField[str]):
+class URLField(pw.CharField, GenericField[TV]):
 
     """Implement URL field.
 
     The field is not validated, but it's just a placeholder for now.
     """
+
+    @overload
+    def __init__(self: URLField[str], *args, null: Literal[False] = ..., **kwargs):
+        ...
+
+    @overload
+    def __init__(
+        self: URLField[Optional[str]],
+        *args,
+        null: Literal[True] = ...,
+        **kwargs,
+    ):
+        ...
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class Choices:
