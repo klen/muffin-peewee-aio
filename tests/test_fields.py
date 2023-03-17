@@ -40,7 +40,7 @@ async def test_uuid(db, transaction, model_cls: Type[AIOModel]):
     assert await M.get() == m
 
 
-async def test_enum_field(db, transaction):
+async def test_enum_field(db, transaction, model_cls: Type[AIOModel]):
     from muffin_peewee import IntEnumField, StrEnumField
 
     class StrEnum(Enum):
@@ -54,7 +54,7 @@ async def test_enum_field(db, transaction):
         c = 3
 
     @db.register
-    class Test(db.Model):
+    class Test(model_cls):
         data = peewee.CharField()
         str_enum = StrEnumField(StrEnum)
         int_enum = IntEnumField(IntEnum)

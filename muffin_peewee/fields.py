@@ -8,7 +8,7 @@ from enum import EnumMeta
 from typing import TYPE_CHECKING, Any, Dict, Generic, Literal, Optional, Union, overload
 
 import peewee as pw
-from asgi_tools.types import TJSON, TV
+from asgi_tools.types import TV
 from peewee_aio.fields import GenericField
 from playhouse.postgres_ext import JSONField as PGJSONField
 
@@ -22,24 +22,6 @@ class JSONLikeField(pw.Field, GenericField[TV]):
 
     unpack = False
     field_type = "text"
-
-    @overload
-    def __init__(
-        self: JSONLikeField[TJSON],
-        *args,
-        null: Literal[False] = ...,
-        **kwargs,
-    ):
-        ...
-
-    @overload
-    def __init__(
-        self: JSONLikeField[Optional[TJSON]],
-        *args,
-        null: Literal[True] = ...,
-        **kwargs,
-    ):
-        ...
 
     def __init__(
         self,
@@ -70,28 +52,14 @@ class JSONLikeField(pw.Field, GenericField[TV]):
 
 
 class JSONPGField(PGJSONField, GenericField[TV]):
-    @overload
-    def __init__(self: JSONPGField[TJSON], *args, null: Literal[False] = ..., **kwargs):
-        ...
-
-    @overload
-    def __init__(
-        self: JSONPGField[Optional[TJSON]],
-        *args,
-        null: Literal[True] = ...,
-        **kwargs,
-    ):
-        ...
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    pass
 
 
 class EnumMixin(Generic[TV]):
 
     """Implement enum mixin."""
 
-    def __init__(self, enum: EnumMeta, *args, **kwargs):
+    def __init__(self, enum, *args, **kwargs):
         """Initialize the field."""
         self.enum = enum
         kwargs.setdefault(
@@ -115,14 +83,20 @@ class EnumMixin(Generic[TV]):
         return self.enum(value)
 
 
-class StrEnumField(EnumMixin[str], pw.CharField, GenericField[EnumMeta]):
+class StrEnumField(EnumMixin[str], pw.CharField, GenericField[TV]):
 
     """Implement enum field."""
 
+    def __init__(self: StrEnumField[TV], enum: type[TV], **kwargs):
+        super().__init__(enum, **kwargs)
 
-class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[EnumMeta]):
+
+class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[TV]):
 
     """Implement enum field."""
+
+    def __init__(self: IntEnumField[TV], enum: type[TV], **kwargs):
+        super().__init__(enum, **kwargs)
 
 
 class URLField(pw.CharField, GenericField[TV]):
