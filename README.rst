@@ -28,7 +28,7 @@ Muffin Peewee AIO
 Requirements
 =============
 
-- python >= 3.7
+- python >= 3.8
 
 .. _installation:
 
@@ -69,7 +69,7 @@ Usage
 Options
 -------
 
-=========================== ======================================= =========================== 
+=========================== ======================================= ===========================
 Name                        Default value                           Desctiption
 --------------------------- --------------------------------------- ---------------------------
 **CONNECTION**              ``sqlite:///db.sqlite``                 Database URL
@@ -78,7 +78,8 @@ Name                        Default value                           Desctiption
 **AUTO_TRANSACTION**        ``True``                                Automatically wrap a request into a transaction
 **MIGRATIONS_ENABLED**      ``True``                                Enable migrations with
 **MIGRATIONS_PATH**         ``"migrations"``                        Set path to the migrations folder
-=========================== ======================================= =========================== 
+**PYTEST_SETUP_DB**         ``True``                                Manage DB schema and connection in pytest
+=========================== ======================================= ===========================
 
 You are able to provide the options when you are initiliazing the plugin:
 

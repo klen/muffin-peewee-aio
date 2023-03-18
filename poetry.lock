@@ -2,14 +2,14 @@
 
 [[package]]
 name = "aio-databases"
-version = "0.14.0"
+version = "0.14.1"
 description = "Async support for various databases"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "aio_databases-0.14.0-py3-none-any.whl", hash = "sha256:a3bc58a6084a0512c45626877bb0b0ed2b221ca4210380ba4625a2caa761a931"},
-    {file = "aio_databases-0.14.0.tar.gz", hash = "sha256:07c3285f54ceac4429fc06237935a9890516072f0fa8510b32ce097a21c155fa"},
+    {file = "aio_databases-0.14.1-py3-none-any.whl", hash = "sha256:6ac80d9c3f37cd98e2e27e783179c799715106d6676b840c9f93613fa5bc538e"},
+    {file = "aio_databases-0.14.1.tar.gz", hash = "sha256:eaa3ef427c384607321acdcb46c788aeb502a6ec547ff8eec1127842c78d0d32"},
 ]
 
 [package.extras]
@@ -454,14 +454,14 @@ tests = ["pytest", "pytest-mypy"]
 
 [[package]]
 name = "muffin"
-version = "0.95.0"
+version = "0.95.3"
 description = "Muffin is a fast, simple and asyncronous web-framework for Python 3 (asyncio, trio, curio)"
 category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "muffin-0.95.0-py3-none-any.whl", hash = "sha256:89594efdcc738e0663766e25d3d2322cbad45156d55469dab7d4fc412c99e7c6"},
-    {file = "muffin-0.95.0.tar.gz", hash = "sha256:269a8601f2ece549e5eb40be9098515368c3286d6846abaddbd3420b60b22b3a"},
+    {file = "muffin-0.95.3-py3-none-any.whl", hash = "sha256:eb73614e624dec57ed79ca447573494e337dbf4efe462bba6ee240f726ace2ed"},
+    {file = "muffin-0.95.3.tar.gz", hash = "sha256:225c5c40fed3d26be997384c2ff64d6df504c2cb4bca34b8c52cb4212f7731da"},
 ]
 
 [package.dependencies]

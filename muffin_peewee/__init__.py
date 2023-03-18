@@ -1,5 +1,6 @@
 """Support Peewee ORM for Muffin framework."""
 
+from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Callable, Optional, Type  # py37, py38: Type
 
 import peewee as pw
@@ -51,6 +52,8 @@ class Plugin(BasePlugin):
         # Setup migration engine
         "migrations_enabled": True,
         "migrations_path": "migrations",
+        # Support pytest
+        "pytest_setup_db": True,
     }
 
     router: Router
@@ -183,3 +186,15 @@ class Plugin(BasePlugin):
             raise PluginNotInstalledError
 
         return self.manager.Model
+
+    @asynccontextmanager
+    async def conftest(self):
+        """Initialize a database schema for pytest."""
+        if self.cfg.pytest_setup_db:
+            async with self:
+                async with self.connection():
+                    await self.create_tables()
+                    yield self
+                    await self.drop_tables()
+        else:
+            yield self
