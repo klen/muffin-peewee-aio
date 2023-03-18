@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING, Callable, Optional, Type  # py37, py38: Type
 
 import peewee as pw
-from aio_databases.database import ConnectionContext, Database, TransactionContext
+from aio_databases.database import ConnectionContext, TransactionContext
 from muffin.plugins import BasePlugin, PluginNotInstalledError
 from peewee_aio.manager import Manager
 from peewee_aio.model import AIOModel
@@ -57,7 +57,6 @@ class Plugin(BasePlugin):
     manager: Manager = Manager(
         "dummy://localhost",
     )  # Dummy manager for support registration
-    database: Database
 
     def setup(self, app: "Application", **options):
         """Init the plugin."""
@@ -68,7 +67,6 @@ class Plugin(BasePlugin):
         for model in list(self.manager):
             manager.register(model)
         self.manager = manager
-        self.database = manager.aio_database
 
         if self.cfg.migrations_enabled:
             router = Router(manager.pw_database, migrate_dir=self.cfg.migrations_path)
@@ -128,30 +126,30 @@ class Plugin(BasePlugin):
 
     async def startup(self):
         """Connect to the database (initialize a pool and etc)."""
-        await self.database.connect()
+        await self.manager.connect()
 
     async def shutdown(self):
         """Disconnect from the database (close a pool and etc.)."""
-        await self.database.disconnect()
+        await self.manager.disconnect()
 
     async def __aenter__(self) -> "Plugin":
         """Connect the database."""
-        await self.database.connect()
+        await self.manager.connect()
         return self
 
-    async def __aexit__(self, *_):
+    async def __aexit__(self, *exit_args):
         """Disconnect the database."""
-        await self.database.disconnect()
+        await self.manager.disconnect()
 
     def register(self, model_cls: Type["TVModel"]) -> Type["TVModel"]:
         """Register a model with self manager."""
         return self.manager.register(model_cls)
 
     def connection(self, *params, **opts) -> ConnectionContext:
-        return self.database.connection(*params, **opts)
+        return self.manager.connection(*params, **opts)
 
     def transaction(self, *params, **opts) -> TransactionContext:
-        return self.database.transaction(*params, **opts)
+        return self.manager.transaction(*params, **opts)
 
     async def create_tables(self, *models_cls: Type[pw.Model]):
         """Create SQL tables."""

@@ -1,6 +1,16 @@
 """Setup tests."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
+
+if TYPE_CHECKING:
+    from muffin import Application
+    from peewee_aio import AIOModel
+
+    from muffin_peewee import Plugin
 
 
 @pytest.fixture()
@@ -18,7 +28,7 @@ def _setup_logging():
 
 
 @pytest.fixture()
-def app():
+def app() -> Application:
     """Create a muffin application."""
     import muffin
 
@@ -26,19 +36,19 @@ def app():
 
 
 @pytest.fixture()
-async def db(app):
+async def db(app: Application) -> Plugin:
     import muffin_peewee
 
     return muffin_peewee.Plugin(app)
 
 
 @pytest.fixture()
-def model_cls(db):
+def model_cls(db: Plugin) -> AIOModel:
     return db.Model
 
 
 @pytest.fixture()
-async def transaction(db):
+async def transaction(db: Plugin):
     """Clean changes after test."""
     async with db.connection():
         async with db.transaction() as trans:

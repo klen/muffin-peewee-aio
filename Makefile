@@ -31,7 +31,7 @@ t test: $(VIRTUAL_ENV)
 
 .PHONY: mypy
 mypy: $(VIRTUAL_ENV)
-	@poetry run mypy muffin_peewee
+	@poetry run mypy
 
 .PHONY: example
 example: $(VIRTUAL_ENV)

@@ -59,10 +59,11 @@ addopts = "-xsv"
 log_cli = true
 
 [tool.mypy]
-packages = ["muffin_peewee"]
+packages = ["muffin_peewee", "tests"]
 install_types = true
 non_interactive = true
 ignore_missing_imports = true
+check_untyped_defs = true
 
 [tool.tox]
 legacy_tox_ini = """

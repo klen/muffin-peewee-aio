@@ -1,17 +1,26 @@
+from __future__ import annotations
+
 from enum import Enum
-from typing import Type
+from typing import TYPE_CHECKING, Type
 
 import peewee
-from peewee_aio import AIOModel
+
+if TYPE_CHECKING:
+    from aio_databases.backends import ABCTransaction
+    from peewee_aio import AIOModel
+
+    from muffin_peewee import Plugin
 
 
-async def test_json_field(db, transaction, model_cls: Type[AIOModel]):
+async def test_json_field(
+    db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]
+):
     from muffin_peewee import JSONLikeField as JSONField
 
     @db.register
-    class Test(model_cls):
+    class Test(model_cls):  # type: ignore[valid-type,misc]
         data = peewee.CharField()
-        json = JSONField(default={})
+        json: JSONField[dict] = JSONField(default={})
 
     await Test.create_table()
 
@@ -23,11 +32,11 @@ async def test_json_field(db, transaction, model_cls: Type[AIOModel]):
     assert test.json == {"key": "value"}
 
 
-async def test_uuid(db, transaction, model_cls: Type[AIOModel]):
+async def test_uuid(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]):
     """Test for UUID in Sqlite."""
 
     @db.register
-    class M(model_cls):
+    class M(model_cls):  # type: ignore[valid-type,misc]
         data = peewee.UUIDField()
 
     await M.create_table()
@@ -40,7 +49,9 @@ async def test_uuid(db, transaction, model_cls: Type[AIOModel]):
     assert await M.get() == m
 
 
-async def test_enum_field(db, transaction, model_cls: Type[AIOModel]):
+async def test_enum_field(
+    db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]
+):
     from muffin_peewee import IntEnumField, StrEnumField
 
     class StrEnum(Enum):
@@ -54,7 +65,7 @@ async def test_enum_field(db, transaction, model_cls: Type[AIOModel]):
         c = 3
 
     @db.register
-    class Test(model_cls):
+    class Test(model_cls):  # type: ignore[valid-type,misc]
         data = peewee.CharField()
         str_enum = StrEnumField(StrEnum)
         int_enum = IntEnumField(IntEnum)
@@ -74,7 +85,7 @@ async def test_enum_field(db, transaction, model_cls: Type[AIOModel]):
     assert test.int_enum == IntEnum.a
 
 
-async def test_choices(db):
+async def test_choices(db: Plugin):
     from muffin_peewee import Choices
 
     choices = Choices("a", "b", "c")

@@ -11,8 +11,8 @@ async def test_lifespan():
     app = muffin.Application("peewee", PEEWEE_CONNECTION="sqlite:///:memory:")
     db = muffin_peewee.Plugin(app)
 
-    with mock.patch.object(db.manager.aio_database, "connect") as mock_connect, mock.patch.object(
-        db.manager.aio_database, "disconnect",
+    with mock.patch.object(db.manager, "connect") as mock_connect, mock.patch.object(
+        db.manager, "disconnect"
     ) as mock_disconnect:
         async with app.lifespan:
             assert mock_connect.called
@@ -28,7 +28,8 @@ async def test_auto_connect(tmp_path):
     from muffin_peewee import Plugin
 
     app = muffin.Application(
-        "peewee", PEEWEE_CONNECTION=f"sqlite:///{ tmp_path / 'db.sqlite' }",
+        "peewee",
+        PEEWEE_CONNECTION=f"sqlite:///{ tmp_path / 'db.sqlite' }",
     )
     db = Plugin(app)
 
@@ -38,7 +39,8 @@ async def test_auto_connect(tmp_path):
     class User(peewee.Model):
         name = peewee.CharField()
 
-    async with db.manager as manager:
+    manager = db.manager
+    async with manager:
         async with manager.connection():
             async with manager.transaction() as trans:
                 await manager.create_tables(User)
