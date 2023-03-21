@@ -5,7 +5,17 @@ from __future__ import annotations
 import json
 from contextlib import suppress
 from enum import EnumMeta
-from typing import TYPE_CHECKING, Any, Dict, Generic, Literal, Optional, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Generic,
+    Literal,
+    Optional,
+    Union,
+    cast,
+    overload,
+)
 
 import peewee as pw
 from asgi_tools.types import TV
@@ -122,8 +132,63 @@ class URLField(pw.CharField, GenericField[TV]):
         ) -> URLField[Optional[str]]:
             ...
 
-        def __new__(cls, *args, **kwargs):
+        def __new__(
+            cls, *args, **kwargs
+        ) -> Union[URLField[str], URLField[Optional[str]]]:
             ...
+
+
+with suppress(ImportError):
+    from datetime import datetime
+
+    from pendulum import instance
+    from pendulum.datetime import DateTime
+    from pendulum.parser import parse
+
+    class DateTimeTZField(pw.DateTimeField, GenericField[TV]):
+        """DateTime field with timezone support."""
+
+        if TYPE_CHECKING:
+
+            @overload
+            def __new__(
+                cls, *args, null: Literal[False] = ..., **kwargs
+            ) -> DateTimeTZField[DateTime]:
+                ...
+
+            @overload
+            def __new__(
+                cls, *args, null: Literal[True] = ..., **kwargs
+            ) -> DateTimeTZField[Optional[DateTime]]:
+                ...
+
+            def __new__(
+                cls, *args, **kwargs
+            ) -> Union[DateTimeTZField[DateTime], DateTimeTZField[Optional[DateTime]]]:
+                ...
+
+        def db_value(self, value: DateTime | datetime | None) -> datetime | None:
+            """Convert datetime to UTC."""
+            if value is None:
+                return value
+
+            if isinstance(value, datetime):
+                return value
+
+            if not isinstance(value, DateTime):
+                raise ValueError("Invalid datetime value")
+
+            return datetime.fromtimestamp(value.timestamp(), tz=value.timezone)
+
+        def python_value(self, value: str | datetime) -> DateTime:
+            """Convert datetime to local timezone."""
+            if isinstance(value, str):
+                return cast(DateTime, parse(value))
+
+            if isinstance(value, datetime):
+                return instance(value)
+
+            return value
 
 
 class Choices:

@@ -31,6 +31,8 @@ async def test_json_field(
     test = await Test.get()
     assert test.json == {"key": "value"}
 
+    assert db.JSONField
+
 
 async def test_uuid(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]):
     """Test for UUID in Sqlite."""
@@ -83,6 +85,12 @@ async def test_enum_field(
     test = await Test.get()
     assert test.str_enum == StrEnum.a
     assert test.int_enum == IntEnum.a
+
+
+async def test_datetimetzfield():
+    from muffin_peewee.fields import DateTimeTZField
+
+    assert DateTimeTZField()
 
 
 async def test_choices(db: Plugin):

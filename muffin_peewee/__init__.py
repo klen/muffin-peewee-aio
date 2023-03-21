@@ -1,7 +1,7 @@
 """Support Peewee ORM for Muffin framework."""
 
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, Callable, Optional, Type  # py37, py38: Type
+from typing import TYPE_CHECKING, Callable, Optional, Type, Union  # py37, py38: Type
 
 import peewee as pw
 from aio_databases.database import ConnectionContext, TransactionContext
@@ -186,6 +186,17 @@ class Plugin(BasePlugin):
             raise PluginNotInstalledError
 
         return self.manager.Model
+
+    @property
+    def JSONField(self) -> Union[Type[JSONLikeField], Type[JSONPGField]]:  # noqa: N802
+        """Return a JSON field for the current backend."""
+        if self.app is None:
+            raise PluginNotInstalledError
+
+        if self.manager.backend.db_type == "postgres":
+            return JSONPGField
+
+        return JSONLikeField
 
     @asynccontextmanager
     async def conftest(self):
