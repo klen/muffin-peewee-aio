@@ -140,10 +140,14 @@ class URLField(pw.CharField, GenericField[TV]):
 
 with suppress(ImportError):
     from datetime import datetime
+    from sqlite3 import register_adapter
 
     from pendulum import instance
     from pendulum.datetime import DateTime
     from pendulum.parser import parse
+
+    # Support pendulum DateTime in peewee (sqlite)
+    register_adapter(DateTime, lambda dt: dt.isoformat())
 
     class DateTimeTZField(pw.DateTimeField, GenericField[TV]):
         """DateTime field with timezone support."""
