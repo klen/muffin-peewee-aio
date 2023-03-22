@@ -26,6 +26,10 @@ if TYPE_CHECKING:
     from .types import TJSONDump, TJSONLoad
 
 
+class JSONPGField(PGJSONField, GenericField[TV]):
+    pass
+
+
 class JSONLikeField(pw.Field, GenericField[TV]):
 
     """Implement JSON field."""
@@ -59,10 +63,6 @@ class JSONLikeField(pw.Field, GenericField[TV]):
             return value
 
         return self._json_dumps(value)
-
-
-class JSONPGField(PGJSONField, GenericField[TV]):
-    pass
 
 
 class EnumMixin(Generic[TV]):

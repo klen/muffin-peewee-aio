@@ -94,7 +94,7 @@ class Plugin(BasePlugin):
                 :param auto: Track changes and setup migrations automatically
                 """
                 with manager.allow_sync():
-                    router.create(name, auto and list(self.manager.models))
+                    router.create(name, auto=auto and list(self.manager.models))
 
             @app.manage
             def peewee_rollback():
