@@ -15,12 +15,12 @@ if TYPE_CHECKING:
 async def test_json_field(
     db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]
 ):
-    from muffin_peewee import JSONLikeField as JSONField
+    from muffin_peewee import JSONLikeField
 
     @db.register
     class Test(model_cls):  # type: ignore[valid-type,misc]
         data = peewee.CharField()
-        json: JSONField[dict] = JSONField(default={})
+        json: JSONLikeField[dict] = JSONLikeField(default={})
 
     await Test.create_table()
 
@@ -31,7 +31,12 @@ async def test_json_field(
     test = await Test.get()
     assert test.json == {"key": "value"}
 
-    assert db.JSONField
+    assert db.JSONField is JSONLikeField
+
+    from muffin_peewee import JSONPGField
+
+    db.manager.backend.db_type = "postgresql"
+    assert db.JSONField is JSONPGField
 
 
 async def test_uuid(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]):

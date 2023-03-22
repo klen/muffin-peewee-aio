@@ -193,7 +193,7 @@ class Plugin(BasePlugin):
         if self.app is None:
             raise PluginNotInstalledError
 
-        if self.manager.backend.db_type == "postgres":
+        if self.manager.backend.db_type == "postgresql":
             return JSONPGField
 
         return JSONLikeField
