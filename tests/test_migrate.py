@@ -10,7 +10,7 @@ async def test_cli(app, db):
 async def test_migrations(db, tmpdir, transaction):
     assert db.router
 
-    db.router.migrate_dir = str(tmpdir.mkdir("migrations"))
+    db.router.migrate_dir = tmpdir.mkdir("migrations")
 
     with db.manager.allow_sync():
         assert not db.router.todo
