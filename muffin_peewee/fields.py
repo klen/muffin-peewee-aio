@@ -123,18 +123,14 @@ class URLField(pw.CharField, GenericField[TV]):
     if TYPE_CHECKING:
 
         @overload
-        def __new__(cls, *args, null: Literal[False] = ..., **kwargs) -> URLField[str]:
+        def __new__(cls, *args, null: Literal[False] = False, **kwargs) -> URLField[str]:
             ...
 
         @overload
-        def __new__(
-            cls, *args, null: Literal[True] = ..., **kwargs
-        ) -> URLField[Optional[str]]:
+        def __new__(cls, *args, null: Literal[True], **kwargs) -> URLField[Optional[str]]:
             ...
 
-        def __new__(
-            cls, *args, **kwargs
-        ) -> Union[URLField[str], URLField[Optional[str]]]:
+        def __new__(cls, *args, **kwargs) -> Union[URLField[str], URLField[Optional[str]]]:
             ...
 
 
@@ -143,10 +139,12 @@ with suppress(ImportError):
     from sqlite3 import register_adapter
 
     from pendulum import instance
+    from pendulum.date import Date
     from pendulum.datetime import DateTime
     from pendulum.parser import parse
 
     # Support pendulum DateTime in peewee (sqlite)
+    register_adapter(Date, lambda dd: dd.isoformat())
     register_adapter(DateTime, lambda dt: dt.isoformat())
 
     class DateTimeTZField(pw.DateTimeField, GenericField[TV]):
@@ -156,13 +154,13 @@ with suppress(ImportError):
 
             @overload
             def __new__(
-                cls, *args, null: Literal[False] = ..., **kwargs
+                cls, *args, null: Literal[False] = False, **kwargs
             ) -> DateTimeTZField[DateTime]:
                 ...
 
             @overload
             def __new__(
-                cls, *args, null: Literal[True] = ..., **kwargs
+                cls, *args, null: Literal[True], **kwargs
             ) -> DateTimeTZField[Optional[DateTime]]:
                 ...
 
@@ -206,9 +204,11 @@ class Choices:
         pw_choices = (
             [(value, name) for name, value in choice.items()]
             if isinstance(choice, dict)
-            else [(e.value, e.name) for e in choice]  # type: ignore[var-annotated]
-            if isinstance(choice, EnumMeta)
-            else [(choice, choice)]
+            else (
+                [(e.value, e.name) for e in choice]  # type: ignore[var-annotated]
+                if isinstance(choice, EnumMeta)
+                else [(choice, choice)]
+            )
         )
         pw_choices.extend([(choice, choice) for choice in choices])
 
