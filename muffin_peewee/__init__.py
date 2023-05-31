@@ -3,6 +3,7 @@
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Callable, Optional, Type, Union  # py37, py38: Type
 
+import click
 import peewee as pw
 from aio_databases.database import ConnectionContext, TransactionContext
 from muffin.plugins import BasePlugin, PluginNotInstalledError
@@ -105,12 +106,17 @@ class Plugin(BasePlugin):
             @app.manage
             def peewee_list():
                 """List migrations."""
+                click.secho("List of migrations:\n", fg="blue")
                 with manager.allow_sync():
-                    router.logger.info("Migrations are done:")
-                    router.logger.info("\n".join(router.done))
-                    router.logger.info("")
-                    router.logger.info("Migrations are undone:")
-                    router.logger.info("\n".join(router.diff))
+                    for migration in router.done:
+                        click.echo(f"- [x] {migration}")
+
+                    for migration in router.diff:
+                        click.echo(f"- [ ] {migration}")
+
+                    click.secho(
+                        f"\nDone: {len(router.done)}, Pending: {len(router.diff)}", fg="blue"
+                    )
 
             @app.manage
             def peewee_clear():

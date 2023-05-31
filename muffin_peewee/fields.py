@@ -72,10 +72,7 @@ class EnumMixin(Generic[TV]):
     def __init__(self, enum, *args, **kwargs):
         """Initialize the field."""
         self.enum = enum
-        kwargs.setdefault(
-            "choices",
-            [(e.value, e.name) for e in enum],  # type: ignore[var-annotated]
-        )
+        kwargs.setdefault("choices", [(e.value, e.name) for e in enum])
         super().__init__(*args, **kwargs)
 
     def db_value(self, value) -> Optional[TV]:
