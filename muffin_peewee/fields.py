@@ -5,17 +5,7 @@ from __future__ import annotations
 import json
 from contextlib import suppress
 from enum import EnumMeta
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Generic,
-    Literal,
-    Optional,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Dict, Generic, Literal, Optional, Union, cast, overload
 
 import peewee as pw
 from asgi_tools.types import TV
@@ -166,7 +156,7 @@ with suppress(ImportError):
             ) -> Union[DateTimeTZField[DateTime], DateTimeTZField[Optional[DateTime]]]:
                 ...
 
-        def db_value(self, value: DateTime | datetime | None) -> datetime | None:
+        def db_value(self, value: datetime | None) -> datetime | None:
             """Convert datetime to UTC."""
             if value is None:
                 return value
@@ -174,10 +164,7 @@ with suppress(ImportError):
             if isinstance(value, datetime):
                 return value
 
-            if not isinstance(value, DateTime):
-                raise ValueError("Invalid datetime value")
-
-            return datetime.fromtimestamp(value.timestamp(), tz=value.timezone)
+            raise ValueError("Invalid datetime value")
 
         def python_value(self, value: str | datetime) -> DateTime:
             """Convert datetime to local timezone."""

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 from enum import Enum
 from typing import TYPE_CHECKING, Type
 
@@ -12,9 +13,7 @@ if TYPE_CHECKING:
     from muffin_peewee import Plugin
 
 
-async def test_json_field(
-    db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]
-):
+async def test_json_field(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]):
     from muffin_peewee import JSONLikeField
 
     @db.register
@@ -56,9 +55,7 @@ async def test_uuid(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIO
     assert await M.get() == m
 
 
-async def test_enum_field(
-    db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]
-):
+async def test_enum_field(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]):
     from muffin_peewee import IntEnumField, StrEnumField
 
     class StrEnum(Enum):
@@ -95,7 +92,15 @@ async def test_enum_field(
 async def test_datetimetzfield():
     from muffin_peewee.fields import DateTimeTZField
 
-    assert DateTimeTZField()
+    field = DateTimeTZField()
+    assert field
+
+    value = field.python_value(dt.datetime.now())  # noqa: DTZ005
+    assert value
+    assert value.tz
+    assert value.tz.name == "UTC"
+
+    assert field.db_value(value)
 
 
 async def test_choices(db: Plugin):
