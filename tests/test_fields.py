@@ -90,17 +90,19 @@ async def test_enum_field(db: Plugin, transaction: ABCTransaction, model_cls: Ty
 
 
 async def test_datetimetzfield():
-    from muffin_peewee.fields import DateTimeTZField
+    from muffin_peewee.fields import DateTime, DateTimeTZField
 
     field = DateTimeTZField()
     assert field
 
-    value = field.python_value(dt.datetime.now())  # noqa: DTZ005
-    assert value
-    assert value.tz
-    assert value.tz.name == "UTC"
+    py_value = field.python_value(dt.datetime.now())  # noqa: DTZ005
+    assert py_value
+    assert py_value.tz
+    assert py_value.tz.name == "UTC"
 
-    assert field.db_value(value)
+    db_value = field.db_value(py_value)
+    assert db_value
+    assert not isinstance(db_value, DateTime)
 
 
 async def test_choices(db: Plugin):
