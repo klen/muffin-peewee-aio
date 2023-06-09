@@ -95,10 +95,10 @@ async def test_datetimetzfield():
     field = DateTimeTZField()
     assert field
 
-    py_value = field.python_value(dt.datetime.now())  # noqa: DTZ005
+    py_value = field.python_value(dt.datetime.now(dt.timezone.utc))
     assert py_value
     assert py_value.tz
-    assert py_value.tz.name == "UTC"
+    assert py_value.tz.name == "+00:00"
 
     db_value = field.db_value(py_value)
     assert db_value

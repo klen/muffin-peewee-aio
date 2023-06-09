@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from contextlib import suppress
+from datetime import datetime, timezone
 from enum import EnumMeta
 from typing import TYPE_CHECKING, Any, Dict, Generic, Literal, Optional, Union, cast, overload
 
@@ -122,7 +123,6 @@ class URLField(pw.CharField, GenericField[TV]):
 
 
 with suppress(ImportError):
-    from datetime import datetime
     from sqlite3 import register_adapter as sqlite_register
 
     from pendulum import instance
@@ -133,6 +133,9 @@ with suppress(ImportError):
     # Support pendulum DateTime in peewee (sqlite)
     sqlite_register(Date, lambda dd: dd.isoformat())
     sqlite_register(DateTime, lambda dt: dt.isoformat())
+
+    from_isoformat = datetime.fromisoformat
+    UTC = timezone.utc
 
     class DateTimeTZField(pw.DateTimeField, GenericField[TV]):
         """DateTime field with timezone support."""
@@ -162,7 +165,7 @@ with suppress(ImportError):
                 return value
 
             if isinstance(value, DateTime):
-                return datetime.fromtimestamp(value.timestamp(), tz=value.timezone)
+                return from_isoformat(value.astimezone(UTC).to_iso8601_string())
 
             if isinstance(value, datetime):
                 return value
