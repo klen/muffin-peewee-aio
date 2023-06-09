@@ -134,8 +134,8 @@ with suppress(ImportError):
     sqlite_register(Date, lambda dd: dd.isoformat())
     sqlite_register(DateTime, lambda dt: dt.isoformat())
 
-    from_isoformat = datetime.fromisoformat
     UTC = timezone.utc
+    from_isoformat = datetime.fromisoformat
 
     class DateTimeTZField(pw.DateTimeField, GenericField[TV]):
         """DateTime field with timezone support."""
@@ -165,7 +165,7 @@ with suppress(ImportError):
                 return value
 
             if isinstance(value, DateTime):
-                return from_isoformat(value.astimezone(UTC).to_iso8601_string())
+                return value.astimezone(UTC).naive()
 
             if isinstance(value, datetime):
                 return value
