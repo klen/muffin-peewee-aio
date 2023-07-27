@@ -1,7 +1,7 @@
 """Support Peewee ORM for Muffin framework."""
 
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, Callable, Optional, Type, Union  # py37, py38: Type
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Type, Union  # py37, py38: Type
 
 import click
 import peewee as pw
@@ -39,11 +39,10 @@ EnumField = StrEnumField
 
 
 class Plugin(BasePlugin):
-
     """Muffin Peewee Plugin."""
 
     name = "peewee"
-    defaults = {
+    defaults: ClassVar[dict[str, Any]] = {
         # Connection params
         "connection": "sqlite:///db.sqlite",
         "connection_params": {},
@@ -62,7 +61,7 @@ class Plugin(BasePlugin):
         "dummy://localhost",
     )  # Dummy manager for support registration
 
-    def setup(self, app: "Application", **options):
+    def setup(self, app: "Application", **options):  # noqa: C901
         """Init the plugin."""
         super().setup(app, **options)
 
@@ -174,9 +173,8 @@ class Plugin(BasePlugin):
         if self.cfg.auto_transaction:
 
             async def middleware(handler, request, receive, send):
-                async with self.connection():
-                    async with self.transaction():
-                        return await handler(request, receive, send)
+                async with self.connection(), self.transaction():
+                    return await handler(request, receive, send)
 
         else:
 
@@ -208,10 +206,12 @@ class Plugin(BasePlugin):
     async def conftest(self):
         """Initialize a database schema for pytest."""
         if self.cfg.pytest_setup_db:
-            async with self:
-                async with self.connection():
-                    await self.create_tables()
-                    yield self
-                    await self.drop_tables()
+            async with self, self.connection():
+                await self.create_tables()
+                yield self
+                await self.drop_tables()
         else:
             yield self
+
+
+# ruff: noqa: FA100, FA101, FA102
