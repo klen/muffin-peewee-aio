@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "muffin-peewee-aio"
-version = "0.15.12"
+version = "0.16.0"
 description = "Peewee-AIO integration for Muffin framework"
 readme = "README.rst"
 license = "MIT"
