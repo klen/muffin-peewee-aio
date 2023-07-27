@@ -1,7 +1,16 @@
 """Support Peewee ORM for Muffin framework."""
 
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Type, Union  # py37, py38: Type
+from typing import (  # py37, py38: Type
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    Optional,
+    Type,
+    Union,
+)
 
 import click
 import peewee as pw
@@ -42,7 +51,7 @@ class Plugin(BasePlugin):
     """Muffin Peewee Plugin."""
 
     name = "peewee"
-    defaults: ClassVar[dict[str, Any]] = {
+    defaults: ClassVar[Dict[str, Any]] = {
         # Connection params
         "connection": "sqlite:///db.sqlite",
         "connection_params": {},
