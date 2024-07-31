@@ -6,7 +6,7 @@ import json
 from contextlib import suppress
 from datetime import datetime, timezone
 from enum import EnumMeta
-from typing import TYPE_CHECKING, Any, Dict, Generic, Literal, Optional, Union, cast, overload
+from typing import TYPE_CHECKING, Any, Generic, Literal, Optional, Union, cast, overload
 
 import peewee as pw
 from asgi_tools.types import TV
@@ -22,7 +22,6 @@ class JSONPGField(PGJSONField, GenericField[TV]):
 
 
 class JSONLikeField(pw.Field, GenericField[TV]):
-
     """Implement JSON field."""
 
     unpack = False
@@ -57,7 +56,6 @@ class JSONLikeField(pw.Field, GenericField[TV]):
 
 
 class EnumMixin(Generic[TV]):
-
     """Implement enum mixin."""
 
     def __init__(self, enum, *args, **kwargs):
@@ -82,27 +80,22 @@ class EnumMixin(Generic[TV]):
 
 
 class StrEnumField(EnumMixin[str], pw.CharField, GenericField[TV]):
-
     """Implement enum field."""
 
     if TYPE_CHECKING:
 
-        def __init__(self: StrEnumField[TV], enum: type[TV], **kwargs):
-            ...
+        def __init__(self, enum: type[TV], **kwargs): ...
 
 
 class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[TV]):
-
     """Implement enum field."""
 
     if TYPE_CHECKING:
 
-        def __init__(self: IntEnumField[TV], enum: type[TV], **kwargs):
-            ...
+        def __init__(self, enum: type[TV], **kwargs): ...
 
 
 class URLField(pw.CharField, GenericField[TV]):
-
     """Implement URL field.
 
     The field is not validated, but it's just a placeholder for now.
@@ -111,15 +104,12 @@ class URLField(pw.CharField, GenericField[TV]):
     if TYPE_CHECKING:
 
         @overload
-        def __new__(cls, *args, null: Literal[False] = False, **kwargs) -> URLField[str]:
-            ...
+        def __new__(cls, *args, null: Literal[False] = False, **kwargs) -> URLField[str]: ...
 
         @overload
-        def __new__(cls, *args, null: Literal[True], **kwargs) -> URLField[Optional[str]]:
-            ...
+        def __new__(cls, *args, null: Literal[True], **kwargs) -> URLField[Optional[str]]: ...
 
-        def __new__(cls, *args, **kwargs) -> Union[URLField[str], URLField[Optional[str]]]:
-            ...
+        def __new__(cls, *args, **kwargs) -> Union[URLField[str], URLField[Optional[str]]]: ...
 
 
 with suppress(ImportError):
@@ -145,19 +135,16 @@ with suppress(ImportError):
             @overload
             def __new__(
                 cls, *args, null: Literal[False] = False, **kwargs
-            ) -> DateTimeTZField[DateTime]:
-                ...
+            ) -> DateTimeTZField[DateTime]: ...
 
             @overload
             def __new__(
                 cls, *args, null: Literal[True], **kwargs
-            ) -> DateTimeTZField[Optional[DateTime]]:
-                ...
+            ) -> DateTimeTZField[Optional[DateTime]]: ...
 
             def __new__(
                 cls, *args, **kwargs
-            ) -> Union[DateTimeTZField[DateTime], DateTimeTZField[Optional[DateTime]]]:
-                ...
+            ) -> Union[DateTimeTZField[DateTime], DateTimeTZField[Optional[DateTime]]]: ...
 
         def db_value(self, value: datetime | None) -> datetime | None:
             """Convert datetime to UTC."""
@@ -184,12 +171,11 @@ with suppress(ImportError):
 
 
 class Choices:
-
     """Model's choices helper."""
 
     __slots__ = "_map", "_rmap"
 
-    def __init__(self, choice: Union[Dict[str, Any], EnumMeta, str], *choices: str):
+    def __init__(self, choice: Union[dict[str, Any], EnumMeta, str], *choices: str):
         """Parse provided choices."""
         pw_choices = (
             [(value, name) for name, value in choice.items()]

@@ -34,7 +34,7 @@ async def test_json_field(db: Plugin, transaction: ABCTransaction, model_cls: Ty
 
     from muffin_peewee import JSONPGField
 
-    db.manager.backend.db_type = "postgresql"
+    db.manager.backend.db_type = "postgresql"  # type: ignore[misc]
     assert db.JSONField is JSONPGField
 
 
@@ -98,7 +98,7 @@ async def test_datetimetzfield():
     py_value = field.python_value(dt.datetime.now(dt.timezone.utc))
     assert py_value
     assert py_value.tz
-    assert py_value.tz.name == "+00:00"
+    assert py_value.tz.name == "UTC"
 
     db_value = field.db_value(py_value)
     assert db_value

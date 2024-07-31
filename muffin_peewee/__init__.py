@@ -1,16 +1,7 @@
 """Support Peewee ORM for Muffin framework."""
 
 from contextlib import asynccontextmanager
-from typing import (  # py37, py38: Type
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    Optional,
-    Type,
-    Union,
-)
+from typing import TYPE_CHECKING, Callable, ClassVar, Optional, Union
 
 import click
 import peewee as pw
@@ -51,7 +42,7 @@ class Plugin(BasePlugin):
     """Muffin Peewee Plugin."""
 
     name = "peewee"
-    defaults: ClassVar[Dict[str, Any]] = {
+    defaults: ClassVar = {
         # Connection params
         "connection": "sqlite:///db.sqlite",
         "connection_params": {},
@@ -149,7 +140,7 @@ class Plugin(BasePlugin):
         """Disconnect from the database (close a pool and etc.)."""
         await self.manager.disconnect()
 
-    async def __aenter__(self) -> "Plugin":
+    async def __aenter__(self) -> "Plugin":  # type: ignore[]
         """Connect the database."""
         await self.manager.connect()
         return self
@@ -158,7 +149,7 @@ class Plugin(BasePlugin):
         """Disconnect the database."""
         await self.manager.disconnect()
 
-    def register(self, model_cls: Type["TVModel"]) -> Type["TVModel"]:
+    def register(self, model_cls: type["TVModel"]) -> type["TVModel"]:
         """Register a model with self manager."""
         return self.manager.register(model_cls)
 
@@ -168,11 +159,11 @@ class Plugin(BasePlugin):
     def transaction(self, *params, **opts) -> TransactionContext:
         return self.manager.transaction(*params, **opts)
 
-    async def create_tables(self, *models_cls: Type[pw.Model]):
+    async def create_tables(self, *models_cls: type[pw.Model]):
         """Create SQL tables."""
         await self.manager.create_tables(*(models_cls or self.manager.models))
 
-    async def drop_tables(self, *models_cls: Type[pw.Model]):
+    async def drop_tables(self, *models_cls: type[pw.Model]):
         """Drop SQL tables."""
         await self.manager.drop_tables(*(models_cls or self.manager.models))
 
@@ -194,14 +185,14 @@ class Plugin(BasePlugin):
         return middleware
 
     @property
-    def Model(self) -> Type[AIOModel]:  # noqa: N802
+    def Model(self) -> type[AIOModel]:  # noqa: N802
         if self.app is None:
             raise PluginNotInstalledError
 
         return self.manager.Model
 
     @property
-    def JSONField(self) -> Union[Type[JSONLikeField], Type[JSONPGField]]:  # noqa: N802
+    def JSONField(self) -> Union[type[JSONLikeField], type[JSONPGField]]:  # noqa: N802
         """Return a JSON field for the current backend."""
         if self.app is None:
             raise PluginNotInstalledError
