@@ -19,9 +19,10 @@ clean:
 #  Development
 # =============
 
-$(VIRTUAL_ENV): pyproject.toml
+$(VIRTUAL_ENV): poetry.lock .pre-commit-config.yaml
+	@[ -d $(VIRTUAL_ENV) ] || python -m venv $(VIRTUAL_ENV)
 	@poetry install --with dev
-	@poetry run pre-commit install --hook-type pre-push
+	@poetry run pre-commit install
 	@touch $(VIRTUAL_ENV)
 
 .PHONY: t test
