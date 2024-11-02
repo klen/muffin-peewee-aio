@@ -26,7 +26,7 @@ packages = [{ include = "muffin_peewee" }]
 python = "^3.9"
 muffin = "^0"
 peewee = "^3"
-peewee-aio = "^1"
+peewee-aio = "*"
 peewee-migrate = "^1"
 typing-extensions = { version = "*", python = "<3.11" }
 
