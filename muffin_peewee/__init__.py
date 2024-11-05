@@ -11,7 +11,15 @@ from peewee_aio.manager import Manager
 from peewee_aio.model import AIOModel
 from peewee_migrate import Router
 
-from .fields import Choices, IntEnumField, JSONLikeField, JSONPGField, StrEnumField, URLField
+from .fields import (
+    Choices,
+    IntEnumField,
+    JSONAsyncPGField,
+    JSONLikeField,
+    JSONPGField,
+    StrEnumField,
+    URLField,
+)
 
 if TYPE_CHECKING:
     from muffin import Application
@@ -190,7 +198,11 @@ class Plugin(BasePlugin):
         if self.app is None:
             raise PluginNotInstalledError
 
-        if self.manager.backend.db_type == "postgresql":
+        backend = self.manager.backend
+        if backend.name == "asyncpg":
+            return JSONAsyncPGField
+
+        if backend.db_type == "postgresql":
             return JSONPGField
 
         return JSONLikeField
