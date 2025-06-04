@@ -12,6 +12,7 @@ import peewee as pw
 from asgi_tools.types import TV
 from peewee_aio.fields import GenericField
 from playhouse.postgres_ext import JSONField as PGJSONField
+from playhouse.sqlite_ext import JSONField as SQLiteJSONField
 
 if TYPE_CHECKING:
     from .types import TJSONDump, TJSONLoad
@@ -22,6 +23,15 @@ class JSONPGField(PGJSONField, GenericField[TV]):
 
 
 class JSONAsyncPGField(JSONPGField):
+    def db_value(self, value):
+        return value
+
+
+class JSONSQLiteField(SQLiteJSONField, GenericField[TV]):
+    pass
+
+
+class JSONAsyncSQLiteField(JSONSQLiteField):
     def db_value(self, value):
         return value
 

@@ -17,6 +17,7 @@ from .fields import (
     JSONAsyncPGField,
     JSONLikeField,
     JSONPGField,
+    JSONSQLiteField,
     StrEnumField,
     URLField,
 )
@@ -193,7 +194,9 @@ class Plugin(BasePlugin):
         return self.manager.Model
 
     @property
-    def JSONField(self) -> Union[type[JSONLikeField], type[JSONPGField]]:  # noqa: N802
+    def JSONField(  # noqa: N802
+        self,
+    ) -> Union[type[JSONLikeField], type[JSONPGField], type[JSONSQLiteField]]:
         """Return a JSON field for the current backend."""
         if self.app is None:
             raise PluginNotInstalledError
@@ -204,6 +207,9 @@ class Plugin(BasePlugin):
 
         if backend.db_type == "postgresql":
             return JSONPGField
+
+        if backend.db_type == "sqlite":
+            return JSONSQLiteField
 
         return JSONLikeField
 

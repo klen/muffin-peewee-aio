@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Type
 
 import peewee
 
+from muffin_peewee.fields import JSONSQLiteField
+
 if TYPE_CHECKING:
     from aio_databases.backends import ABCTransaction
     from peewee_aio import AIOModel
@@ -14,12 +16,10 @@ if TYPE_CHECKING:
 
 
 async def test_json_field(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]):
-    from muffin_peewee import JSONLikeField
-
     @db.register
     class Test(model_cls):  # type: ignore[valid-type,misc]
         data = peewee.CharField()
-        json: JSONLikeField[dict] = JSONLikeField(default={})
+        json = db.JSONField(default={})
 
     await Test.create_table()
 
@@ -27,10 +27,10 @@ async def test_json_field(db: Plugin, transaction: ABCTransaction, model_cls: Ty
     inst = await inst.save()
     assert inst.json
 
-    test = await Test.get()
+    test = await Test.select().where(Test.json["key"] == "value").get()
     assert test.json == {"key": "value"}
 
-    assert db.JSONField is JSONLikeField
+    assert db.JSONField is JSONSQLiteField
 
     from muffin_peewee import JSONPGField
 
