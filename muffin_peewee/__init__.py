@@ -1,7 +1,7 @@
 """Support Peewee ORM for Muffin framework."""
 
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, Callable, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Callable, ClassVar
 
 import click
 import peewee as pw
@@ -27,14 +27,14 @@ if TYPE_CHECKING:
     from peewee_aio.types import TVModel
 
 __all__ = (
-    "Plugin",
     "Choices",
-    "StrEnumField",
-    "IntEnumField",
     "EnumField",
-    "URLField",
+    "IntEnumField",
     "JSONLikeField",
     "JSONPGField",
+    "Plugin",
+    "StrEnumField",
+    "URLField",
 )
 
 EnumField = StrEnumField
@@ -79,7 +79,7 @@ class Plugin(BasePlugin):
 
             # Register migration commands
             @app.manage
-            def peewee_migrate(name: Optional[str] = None, *, fake: bool = False):
+            def peewee_migrate(name: str = "", *, fake: bool = False):
                 """Run application's migrations.
 
                 :param name: Choose a migration' name
@@ -196,7 +196,7 @@ class Plugin(BasePlugin):
     @property
     def JSONField(  # noqa: N802
         self,
-    ) -> Union[type[JSONLikeField], type[JSONPGField], type[JSONSQLiteField]]:
+    ) -> type[JSONLikeField] | type[JSONPGField] | type[JSONSQLiteField]:
         """Return a JSON field for the current backend."""
         if self.app is None:
             raise PluginNotInstalledError
@@ -223,6 +223,3 @@ class Plugin(BasePlugin):
                 await self.drop_tables()
         else:
             yield self
-
-
-# ruff: noqa: FA100, FA101, FA102

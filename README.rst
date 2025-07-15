@@ -1,11 +1,7 @@
 Muffin Peewee AIO
 #################
 
-.. _description:
-
-**muffin-peewee-aio** -- Peewee_ ORM integration to Muffin_ framework.
-
-.. _badges:
+**muffin-peewee-aio** — Asynchronous Peewee_ ORM integration for the Muffin_ framework.
 
 .. image:: https://github.com/klen/muffin-peewee-aio/workflows/tests/badge.svg
     :target: https://github.com/klen/muffin-peewee-aio/actions
@@ -19,35 +15,26 @@ Muffin Peewee AIO
     :target: https://pypi.org/project/muffin-peewee-aio/
     :alt: Python Versions
 
-.. _contents:
-
 .. contents::
 
-.. _requirements:
-
 Requirements
-=============
+============
 
-- python >= 3.9
-
-.. _installation:
+- Python >= 3.10
 
 Installation
-=============
+============
 
-**Muffin Peewee** should be installed using pip: ::
+Install via pip: ::
 
     $ pip install muffin-peewee-aio
 
-You can install optional database drivers with: ::
+You can include an async database driver as needed: ::
 
     $ pip install muffin-peewee-aio[aiosqlite]
     $ pip install muffin-peewee-aio[aiopg]
     $ pip install muffin-peewee-aio[asyncpg]
     $ pip install muffin-peewee-aio[aiomysql]
-
-
-.. _usage:
 
 Usage
 =====
@@ -57,135 +44,141 @@ Usage
     from muffin import Application
     from muffin_peewee import Plugin as Peewee
 
-    # Create Muffin Application
-    app = Application('example')
+    # Create the application
+    app = Application("example")
 
     # Initialize the plugin
-    # As alternative: db = Peewee(app, **options)
     db = Peewee()
-    db.setup(app, PEEWEE_CONNECTION='postgresql://postgres:postgres@localhost:5432/database')
+    db.setup(app, PEEWEE_CONNECTION="postgresql://postgres:postgres@localhost:5432/database")
+
+    # Or: db = Peewee(app, **options)
 
 
-Options
--------
+Configuration
+=============
 
-=========================== ======================================= ===========================
-Name                        Default value                           Desctiption
---------------------------- --------------------------------------- ---------------------------
-**CONNECTION**              ``sqlite:///db.sqlite``                 Database URL
-**CONNECTION_PARAMS**       ``{}``                                  Additional params for DB connection
-**AUTO_CONNECTION**         ``True``                                Automatically get a connection from db for a request
-**AUTO_TRANSACTION**        ``True``                                Automatically wrap a request into a transaction
-**MIGRATIONS_ENABLED**      ``True``                                Enable migrations with
-**MIGRATIONS_PATH**         ``"migrations"``                        Set path to the migrations folder
-**PYTEST_SETUP_DB**         ``True``                                Manage DB schema and connection in pytest
-=========================== ======================================= ===========================
+You can provide options either at initialization or through the application config.
 
-You are able to provide the options when you are initiliazing the plugin:
++------------------------+-----------------------------------------+----------------------------------------------------+
+| Name                   | Default                                 | Description                                        |
++========================+=========================================+====================================================+
+| **CONNECTION**         | ``sqlite:///db.sqlite``                 | Database connection URL                            |
++------------------------+-----------------------------------------+----------------------------------------------------+
+| **CONNECTION_PARAMS**  | ``{}``                                  | Extra options passed to the database backend       |
++------------------------+-----------------------------------------+----------------------------------------------------+
+| **AUTO_CONNECTION**    | ``True``                                | Automatically acquire a DB connection per request  |
++------------------------+-----------------------------------------+----------------------------------------------------+
+| **AUTO_TRANSACTION**   | ``True``                                | Automatically wrap each request in a transaction   |
++------------------------+-----------------------------------------+----------------------------------------------------+
+| **MIGRATIONS_ENABLED** | ``True``                                | Enable the migration engine                        |
++------------------------+-----------------------------------------+----------------------------------------------------+
+| **MIGRATIONS_PATH**    | ``"migrations"``                        | Path to store migration files                      |
++------------------------+-----------------------------------------+----------------------------------------------------+
+| **PYTEST_SETUP_DB**    | ``True``                                | Manage DB setup and teardown in pytest             |
++------------------------+-----------------------------------------+----------------------------------------------------+
 
-.. code-block:: python
+You can also define options in the `Application` config using the `PEEWEE_` prefix: ::
 
-    db.setup(app, connection='DB_URL')
+    PEEWEE_CONNECTION = "postgresql://..."
 
+Note: Muffin application config is case-insensitive.
 
-Or setup it inside ``Muffin.Application`` config using the ``PEEWEE_`` prefix:
+Models and Queries
+==================
 
-.. code-block:: python
-
-   PEEWEE_CONNECTION = 'DB_URL'
-
-``Muffin.Application`` configuration options are case insensitive
-
-Queries
--------
+Define your model:
 
 .. code-block:: python
 
     class Test(db.Model):
         data = peewee.CharField()
 
-
-    @app.route('/')
-    async def view(request):
-        return [t.data async for t in Test.select()]
-
-Manage connections
-------------------
+Query the database:
 
 .. code-block:: python
 
-    # Set configuration option `MANAGE_CONNECTIONS` to False
-
-    # Use context manager
-    @app.route('/')
+    @app.route("/")
     async def view(request):
-        # Aquire a connection
-        async with db.manager.connection():
-            # Work with db
-            # ...
+        return [t.data async for t in Test.select()]
 
+Connection Management
+=====================
+
+By default, connections and transactions are managed automatically.
+To manage them manually, disable the config flags and use context managers:
+
+.. code-block:: python
+
+    @app.route("/")
+    async def view(request):
+        async with db.connection():
+            async with db.transaction():
+                # Perform DB operations here
+                ...
 
 Migrations
-----------
+==========
 
-Create migrations: ::
+Create a migration: ::
 
     $ muffin example:app peewee-create [NAME] [--auto]
-
 
 Run migrations: ::
 
     $ muffin example:app peewee-migrate [NAME] [--fake]
 
+Rollback the latest migration: ::
 
-Rollback migrations: ::
+    $ muffin example:app peewee-rollback
 
-    $ muffin example:app peewee-rollback [NAME]
-
-
-List migrations: ::
+List all migrations: ::
 
     $ muffin example:app peewee-list
 
-
-Clear migrations from DB: ::
+Clear migration history from the database: ::
 
     $ muffin example:app peewee-clear
 
-
-Merge migrations: ::
+Merge all migrations into one: ::
 
     $ muffin example:app peewee-merge
 
+Testing Support
+===============
 
-.. _bugtracker:
+You can use the `conftest()` context manager to auto-manage schema setup and teardown during testing:
 
-Bug tracker
+.. code-block:: python
+
+    import pytest
+
+    @pytest.mark.asyncio
+    async def test_example():
+        async with db.conftest():
+            # Tables are created and dropped automatically
+            ...
+
+Bug Tracker
 ===========
 
-If you have any suggestions, bug reports or
-annoyances please report them to the issue tracker
-at https://github.com/klen/muffin-peewee-aio/issues
-
-.. _contributing:
+Found a bug or have a suggestion? Please open an issue at:
+https://github.com/klen/muffin-peewee-aio/issues
 
 Contributing
 ============
 
-Development of Muffin Peewee happens at: https://github.com/klen/muffin-peewee-aio
-
+Development takes place at: https://github.com/klen/muffin-peewee-aio
+Pull requests are welcome!
 
 Contributors
-=============
+============
 
-* klen_ (Kirill Klenov)
-
-.. _license:
+* `klen`_ (Kirill Klenov)
 
 License
-========
+=======
 
-Licensed under a `MIT license`_.
+This project is licensed under the `MIT license`_.
 
 .. _links:
 

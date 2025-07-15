@@ -99,8 +99,7 @@ class StrEnumField(EnumMixin[str], pw.CharField, GenericField[TV]):
 
     if TYPE_CHECKING:
 
-        def __init__(self, enum: type[TV], **kwargs):
-            ...
+        def __init__(self, enum: type[TV], **kwargs): ...
 
 
 class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[TV]):
@@ -108,8 +107,7 @@ class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[TV]):
 
     if TYPE_CHECKING:
 
-        def __init__(self, enum: type[TV], **kwargs):
-            ...
+        def __init__(self, enum: type[TV], **kwargs): ...
 
 
 class URLField(pw.CharField, GenericField[TV]):
@@ -121,15 +119,12 @@ class URLField(pw.CharField, GenericField[TV]):
     if TYPE_CHECKING:
 
         @overload
-        def __new__(cls, *args, null: Literal[False] = False, **kwargs) -> URLField[str]:
-            ...
+        def __new__(cls, *args, null: Literal[False] = False, **kwargs) -> URLField[str]: ...
 
         @overload
-        def __new__(cls, *args, null: Literal[True], **kwargs) -> URLField[Optional[str]]:
-            ...
+        def __new__(cls, *args, null: Literal[True], **kwargs) -> URLField[Optional[str]]: ...
 
-        def __new__(cls, *args, **kwargs) -> Union[URLField[str], URLField[Optional[str]]]:
-            ...
+        def __new__(cls, *args, **kwargs) -> Union[URLField[str], URLField[Optional[str]]]: ...
 
 
 with suppress(ImportError):
@@ -155,19 +150,16 @@ with suppress(ImportError):
             @overload
             def __new__(
                 cls, *args, null: Literal[False] = False, **kwargs
-            ) -> DateTimeTZField[DateTime]:
-                ...
+            ) -> DateTimeTZField[DateTime]: ...
 
             @overload
             def __new__(
                 cls, *args, null: Literal[True], **kwargs
-            ) -> DateTimeTZField[Optional[DateTime]]:
-                ...
+            ) -> DateTimeTZField[Optional[DateTime]]: ...
 
             def __new__(
                 cls, *args, **kwargs
-            ) -> Union[DateTimeTZField[DateTime], DateTimeTZField[Optional[DateTime]]]:
-                ...
+            ) -> Union[DateTimeTZField[DateTime], DateTimeTZField[Optional[DateTime]]]: ...
 
         def db_value(self, value: datetime | None) -> datetime | None:
             """Convert datetime to UTC."""
@@ -185,7 +177,7 @@ with suppress(ImportError):
         def python_value(self, value: str | datetime) -> DateTime:
             """Convert datetime to local timezone."""
             if isinstance(value, str):
-                return cast(DateTime, parse(value))
+                return cast("DateTime", parse(value))
 
             if isinstance(value, datetime):
                 return instance(value)
