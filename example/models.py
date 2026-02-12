@@ -8,5 +8,5 @@ from example import db
 
 @db.register
 class DataItem(AIOModel):
-    created = peewee.DateTimeField(default=datetime.datetime.utcnow)
+    created = peewee.DateTimeField(default=datetime.datetime.now)
     content = peewee.CharField()

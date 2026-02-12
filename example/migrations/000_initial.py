@@ -1,4 +1,4 @@
-""" Peewee migrations. """
+"""Peewee migrations."""
 
 import datetime as dt
 
@@ -6,7 +6,7 @@ import peewee as pw
 
 
 def migrate(migrator, database, **kwargs):
-    """ Write your migrations here.
+    """Write your migrations here.
 
     > Model = migrator.orm['name']
 
@@ -25,7 +25,8 @@ def migrate(migrator, database, **kwargs):
     > migrator.add_default(Model, field_name, default)
 
     """
+
     @migrator.create_table
     class DataItem(pw.Model):
-        created = pw.DateTimeField(default=dt.datetime.utcnow)
+        created = pw.DateTimeField(default=dt.datetime.now)
         content = pw.CharField()

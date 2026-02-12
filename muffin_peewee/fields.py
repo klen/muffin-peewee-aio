@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Generic, Literal, Optional, Union, cast, 
 
 import peewee as pw
 from asgi_tools.types import TV
-from peewee_aio.fields import GenericField
+from peewee_aio.fields import GenericField, JSONGenericField
 from playhouse.postgres_ext import JSONField as PGJSONField
 from playhouse.sqlite_ext import JSONField as SQLiteJSONField
 
@@ -22,21 +22,21 @@ class JSONPGField(PGJSONField, GenericField[TV]):
     pass
 
 
-class JSONAsyncPGField(JSONPGField):
+class JSONAsyncPGField(JSONPGField, JSONGenericField[TV]):
     def db_value(self, value):
         return value
 
 
-class JSONSQLiteField(SQLiteJSONField, GenericField[TV]):
+class JSONSQLiteField(SQLiteJSONField, JSONGenericField[TV]):  # type: ignore[]
     pass
 
 
-class JSONAsyncSQLiteField(JSONSQLiteField):
+class JSONAsyncSQLiteField(JSONSQLiteField, JSONGenericField[TV]):
     def db_value(self, value):
         return value
 
 
-class JSONLikeField(pw.Field, GenericField[TV]):
+class JSONLikeField(pw.Field, JSONGenericField[TV]):
     """Implement JSON field."""
 
     unpack = False

@@ -7,10 +7,11 @@ async def test_cli(app, db):
     assert "peewee-merge" in app.manage.commands
 
 
-async def test_migrations(db, tmpdir, transaction):
+async def test_migrations(db, tmp_path, transaction):
     assert db.router
 
-    db.router.migrate_dir = tmpdir.mkdir("migrations")
+    db.router.migrate_dir = tmp_path / "migrations"
+    db.router.migrate_dir.mkdir()
 
     with db.manager.allow_sync():
         assert not db.router.todo

@@ -1,10 +1,11 @@
-[tool.poetry]
+[project]
 name = "muffin-peewee-aio"
 version = "1.4.0"
 description = "Peewee-AIO integration for Muffin framework"
+authors = [{ name = "Kirill Klenov", email = "horneds@gmail.com" }]
+requires-python = ">=3.10,<4"
 readme = "README.rst"
 license = "MIT"
-authors = ["Kirill Klenov <horneds@gmail.com>"]
 keywords = ["peewee", "sql", "orm", "asyncio", "muffin"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -16,53 +17,46 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Framework :: AsyncIO",
 ]
-homepage = "https://github.com/klen/muffin-peewee"
-repository = "https://github.com/klen/muffin-peewee"
-packages = [{ include = "muffin_peewee" }]
+dependencies = ["muffin", "peewee>=3,<4", "peewee-aio", "peewee-migrate>=1,<2"]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-muffin = "*"
-peewee = "^3"
-peewee-aio = "*"
-peewee-migrate = "^1"
-typing-extensions = { version = "*", python = "<3.11" }
-
-# Optional dependencies
-aiopg = { version = "*", optional = true }
-asyncpg = { version = "*", optional = true }
-aiomysql = { version = "*", optional = true }
-aiosqlite = { version = "*", optional = true }
-
-[tool.poetry.extras]
+[project.optional-dependencies]
 aiopg = ["aiopg"]
 asyncpg = ["asyncpg"]
 aiomysql = ["aiomysql"]
 aiosqlite = ["aiosqlite"]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "*"
-pytest-aio = "*"
-pytest-mypy = "*"
-aiosqlite = "*"
-uvicorn = "*"
-ruff = "*"
-black = "*"
-pre-commit = "*"
-pendulum = "*"
+[project.urls]
+Homepage = "https://github.com/klen/muffin-peewee"
+Repository = "https://github.com/klen/muffin-peewee"
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "pytest-aio",
+  "aiosqlite",
+  "uvicorn",
+  "ruff",
+  "pre-commit",
+  "pendulum",
+  "pyrefly>=0.52.0",
+]
+
+[tool.uv]
+
+[tool.uv.build-backend]
+module-name = ["muffin_peewee"]
+module-root = ""
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 addopts = "-xsv"
 log_cli = true
-
-[tool.mypy]
-packages = ["muffin_peewee", "tests"]
-install_types = true
-non_interactive = true
-ignore_missing_imports = true
-check_untyped_defs = true
 
 [tool.tox]
 legacy_tox_ini = """
@@ -72,10 +66,15 @@ envlist = py310,py311,py312,py313
 [testenv]
 deps = -e .[tests]
 commands =
-	pytest --mypy tests
+	pytest tests
 """
 
+[tool.pyrefly]
+project-includes = ["muffin_peewee"]
+
 [tool.ruff]
+include = ["muffin_peewee", "tests"]
+exclude = ["example"]
 line-length = 100
 target-version = "py310"
 
@@ -104,11 +103,12 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["ARG"]
 
-[tool.black]
-line-length = 100
-target-version = ["py310", "py311", "py312", "py313"]
-preview = true
+[tool.bumpversion]
+current_version = "1.4.0"
+commit = false
+tag = false
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'

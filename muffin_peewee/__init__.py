@@ -46,7 +46,7 @@ class Plugin(BasePlugin):
     name = "peewee"
     defaults: ClassVar = {
         # Connection params
-        "connection": "sqlite:///db.sqlite",
+        "connection": "aiosqlite:///db.sqlite",
         "connection_params": {},
         # Manage connections automatically
         "auto_connection": True,
@@ -142,12 +142,12 @@ class Plugin(BasePlugin):
         """Disconnect from the database (close a pool and etc.)."""
         await self.manager.disconnect()
 
-    async def __aenter__(self) -> "Plugin":  # type: ignore[]
+    async def __aenter__(self):
         """Connect the database."""
         await self.manager.connect()
         return self
 
-    async def __aexit__(self, *exit_args):
+    async def __aexit__(self, exc_type, exc, tb):
         """Disconnect the database."""
         await self.manager.disconnect()
 
