@@ -330,7 +330,7 @@ wheels = [
 
 [[package]]
 name = "muffin-peewee-aio"
-version = "1.5.3"
+version = "2.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "muffin" },
