@@ -18,25 +18,25 @@ if TYPE_CHECKING:
     from .types import TJSONDump, TJSONLoad
 
 
-class JSONPGField(PGJSONField, GenericField[TV]):
+class JSONPGField(JSONGenericField[TV], PGJSONField):  # type: ignore[inconsistent-inheritance]
     pass
 
 
-class JSONAsyncPGField(JSONPGField, JSONGenericField[TV]):
+class JSONAsyncPGField(JSONPGField):
     def db_value(self, value):
         return value
 
 
-class JSONSQLiteField(SQLiteJSONField, JSONGenericField[TV]):  # type: ignore[]
+class JSONSQLiteField(JSONGenericField[TV], SQLiteJSONField):  # type: ignore[inconsistent-inheritance]
     pass
 
 
-class JSONAsyncSQLiteField(JSONSQLiteField, JSONGenericField[TV]):
+class JSONAsyncSQLiteField(JSONSQLiteField):
     def db_value(self, value):
         return value
 
 
-class JSONLikeField(pw.Field, JSONGenericField[TV]):
+class JSONLikeField(JSONGenericField[TV], pw.Field):
     """Implement JSON field."""
 
     unpack = False
@@ -94,7 +94,7 @@ class EnumMixin(Generic[TV]):
         return self.enum(value)
 
 
-class StrEnumField(EnumMixin[str], pw.CharField, GenericField[TV]):
+class StrEnumField(EnumMixin[str], GenericField[TV], pw.CharField):
     """Implement enum field."""
 
     if TYPE_CHECKING:
@@ -102,7 +102,7 @@ class StrEnumField(EnumMixin[str], pw.CharField, GenericField[TV]):
         def __init__(self, enum: type[TV], **kwargs): ...
 
 
-class IntEnumField(EnumMixin[int], pw.IntegerField, GenericField[TV]):
+class IntEnumField(EnumMixin[int], GenericField[TV], pw.IntegerField):
     """Implement enum field."""
 
     if TYPE_CHECKING:
