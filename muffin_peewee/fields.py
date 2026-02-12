@@ -22,7 +22,7 @@ class JSONPGField(JSONGenericField[TV], PGJSONField):  # type: ignore[inconsiste
     pass
 
 
-class JSONAsyncPGField(JSONPGField):
+class JSONAsyncPGField(JSONPGField[TV]):
     def db_value(self, value):
         return value
 

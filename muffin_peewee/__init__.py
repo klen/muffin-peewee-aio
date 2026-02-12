@@ -1,12 +1,13 @@
 """Support Peewee ORM for Muffin framework."""
 
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, Callable, ClassVar
+from typing import TYPE_CHECKING, Callable, ClassVar, Literal, overload
 
 import click
 import peewee as pw
 from aio_databases.database import ConnectionContext, TransactionContext
 from muffin.plugins import BasePlugin, PluginNotInstalledError
+from peewee_aio.fields import JSONGenericField
 from peewee_aio.manager import Manager
 from peewee_aio.model import AIOModel
 from peewee_migrate import Router
@@ -21,6 +22,7 @@ from .fields import (
     StrEnumField,
     URLField,
 )
+from .types import TV
 
 if TYPE_CHECKING:
     from muffin import Application
@@ -193,25 +195,32 @@ class Plugin(BasePlugin):
 
         return self.manager.Model
 
-    @property
-    def JSONField(  # noqa: N802
-        self,
-    ) -> type[JSONLikeField] | type[JSONPGField] | type[JSONSQLiteField]:
-        """Return a JSON field for the current backend."""
+    @overload
+    def JSONField(
+        self, default: Callable[[], TV], *, null: Literal[True], **kwargs
+    ) -> JSONGenericField[TV | None]: ...
+
+    @overload
+    def JSONField(
+        self, default: Callable[[], TV], *, null: Literal[False] = False, **kwargs
+    ) -> JSONGenericField[TV]: ...
+
+    def JSONField(self, default: Callable[[], TV], **kwargs) -> JSONGenericField[TV]:  # noqa: N802
+        """Return a JSON field for the current backend with custom factory."""
         if self.app is None:
             raise PluginNotInstalledError
 
         backend = self.manager.backend
         if backend.name == "asyncpg":
-            return JSONAsyncPGField
+            return JSONAsyncPGField(default=default, **kwargs)
 
         if backend.db_type == "postgresql":
-            return JSONPGField
+            return JSONPGField(default=default, **kwargs)
 
         if backend.db_type == "sqlite":
-            return JSONSQLiteField
+            return JSONSQLiteField(default=default, **kwargs)
 
-        return JSONLikeField
+        return JSONLikeField(default=default, **kwargs)
 
     @asynccontextmanager
     async def conftest(self):
