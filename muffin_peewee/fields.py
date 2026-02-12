@@ -142,7 +142,7 @@ with suppress(ImportError):
     UTC = timezone.utc
     from_isoformat = datetime.fromisoformat
 
-    class DateTimeTZField(pw.DateTimeField, GenericField[TV]):
+    class DateTimeTZField(GenericField[TV], pw.DateTimeField):
         """DateTime field with timezone support."""
 
         if TYPE_CHECKING:
