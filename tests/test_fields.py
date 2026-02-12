@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import datetime as dt
+import uuid
 from enum import Enum
 from typing import TYPE_CHECKING, Type
 
 import peewee
 
-from muffin_peewee.fields import JSONSQLiteField
+from muffin_peewee import Choices, IntEnumField, JSONPGField, StrEnumField
+from muffin_peewee.fields import DateTimeTZField, JSONSQLiteField
 
 if TYPE_CHECKING:
     from aio_databases.backends import ABCTransaction
@@ -32,8 +34,6 @@ async def test_json_field(db: Plugin, transaction: ABCTransaction, model_cls: Ty
 
     assert db.JSONField is JSONSQLiteField
 
-    from muffin_peewee import JSONPGField
-
     db.manager.backend.db_type = "postgresql"  # type: ignore[misc]
     assert db.JSONField is JSONPGField
 
@@ -47,8 +47,6 @@ async def test_uuid(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIO
 
     await M.create_table()
 
-    import uuid
-
     m = M(data=uuid.uuid1())
     await m.save()
 
@@ -56,7 +54,6 @@ async def test_uuid(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIO
 
 
 async def test_enum_field(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]):
-    from muffin_peewee import IntEnumField, StrEnumField
 
     class StrEnum(Enum):
         a = "A"
@@ -88,9 +85,11 @@ async def test_enum_field(db: Plugin, transaction: ABCTransaction, model_cls: Ty
     assert test.str_enum == StrEnum.a
     assert test.int_enum == IntEnum.a
 
+    assert await Test.select().where(Test.int_enum << [IntEnum.a, IntEnum.b]).get()
+    assert await Test.select().where(Test.str_enum << [StrEnum.a, StrEnum.b]).get()
+
 
 async def test_datetimetzfield():
-    from muffin_peewee.fields import DateTimeTZField
 
     field = DateTimeTZField()
     assert field
@@ -106,7 +105,6 @@ async def test_datetimetzfield():
 
 
 async def test_choices(db: Plugin):
-    from muffin_peewee import Choices
 
     choices = Choices("a", "b", "c")
 
