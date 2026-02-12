@@ -1,6 +1,7 @@
 """Support Peewee ORM for Muffin framework."""
 
 from contextlib import asynccontextmanager
+from copy import copy
 from typing import TYPE_CHECKING, Callable, ClassVar, Literal, overload
 
 import click
@@ -197,30 +198,32 @@ class Plugin(BasePlugin):
 
     @overload
     def JSONField(
-        self, default: Callable[[], TV], *, null: Literal[True], **kwargs
+        self, default: TV, *, null: Literal[True], **kwargs
     ) -> JSONGenericField[TV | None]: ...
 
     @overload
     def JSONField(
-        self, default: Callable[[], TV], *, null: Literal[False] = False, **kwargs
+        self, default: TV, *, null: Literal[False] = False, **kwargs
     ) -> JSONGenericField[TV]: ...
 
-    def JSONField(self, default: Callable[[], TV], **kwargs) -> JSONGenericField[TV]:  # noqa: N802
+    def JSONField(self, default: TV, **kwargs) -> JSONGenericField[TV]:  # noqa: N802
         """Return a JSON field for the current backend with custom factory."""
         if self.app is None:
             raise PluginNotInstalledError
 
+        factory = lambda: copy(default) if isinstance(default, (dict, list)) else default  # noqa: E731
+
         backend = self.manager.backend
         if backend.name == "asyncpg":
-            return JSONAsyncPGField(default=default, **kwargs)
+            return JSONAsyncPGField(default=factory, **kwargs)
 
         if backend.db_type == "postgresql":
-            return JSONPGField(default=default, **kwargs)
+            return JSONPGField(default=factory, **kwargs)
 
         if backend.db_type == "sqlite":
-            return JSONSQLiteField(default=default, **kwargs)
+            return JSONSQLiteField(default=factory, **kwargs)
 
-        return JSONLikeField(default=default, **kwargs)
+        return JSONLikeField(default=factory, **kwargs)
 
     @asynccontextmanager
     async def conftest(self):

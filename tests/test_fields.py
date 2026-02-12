@@ -21,7 +21,7 @@ async def test_json_field(db: Plugin, transaction: ABCTransaction, model_cls: Ty
     @db.register
     class Test(model_cls):  # type: ignore[valid-type,misc]
         data = peewee.CharField()
-        json = db.JSONField(dict)
+        json = db.JSONField({})
 
     await Test.create_table()
 
@@ -32,10 +32,14 @@ async def test_json_field(db: Plugin, transaction: ABCTransaction, model_cls: Ty
     test = await Test.select().where(Test.json["key"] == "value").get()
     assert test.json == {"key": "value"}
 
-    assert isinstance(db.JSONField(dict), JSONSQLiteField)
+    assert isinstance(db.JSONField({}), JSONSQLiteField)
 
     db.manager.backend.db_type = "postgresql"  # type: ignore[misc]
-    assert isinstance(db.JSONField(dict), JSONPGField)
+    assert isinstance(db.JSONField({}), JSONPGField)
+
+    f1 = db.JSONField({})
+    f2 = db.JSONField({})
+    assert id(f1.default) != id(f2.default)
 
 
 async def test_uuid(db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]):
