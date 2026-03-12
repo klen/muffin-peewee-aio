@@ -29,9 +29,17 @@ $(VIRTUAL_ENV): uv.lock pyproject.toml
 t test: $(VIRTUAL_ENV)
 	@uv run pytest tests
 
-.PHONY: mypy
-mypy: $(VIRTUAL_ENV)
-	@uv run mypy
+.PHONY: types
+# target: types - Check typing
+types: $(VIRTUAL_ENV)
+	@echo 'Checking typing...'
+	@uv run pyrefly check
+
+.PHONY: lint
+# target: lint - Check code
+lint: $(VIRTUAL_ENV)
+	@make types
+	@uv run ruff check
 
 .PHONY: example
 example: $(VIRTUAL_ENV)

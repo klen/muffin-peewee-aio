@@ -6,6 +6,8 @@ import peewee
 import pytest
 from peewee_aio import AIOModel
 
+import muffin_peewee
+
 if TYPE_CHECKING:
     from aio_databases.backends import ABCTransaction
     from muffin import Application
@@ -27,15 +29,12 @@ async def test_conftest(db: Plugin, transaction: ABCTransaction):
 
 
 async def test_context_manager(app: Application):
-    import muffin_peewee
 
     async with muffin_peewee.Plugin(app) as db:
         assert db
 
 
 async def test_delayed_registration(app: Application):
-    import muffin_peewee
-
     db = muffin_peewee.Plugin()
     assert db
     assert db.manager
