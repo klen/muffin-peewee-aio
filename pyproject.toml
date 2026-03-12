@@ -41,7 +41,7 @@ dev = [
   "ruff",
   "pre-commit",
   "pendulum",
-  "pyrefly>=0.52.0",
+  "pyrefly",
 ]
 
 [tool.uv]

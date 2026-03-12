@@ -44,14 +44,15 @@ example: $(VIRTUAL_ENV)
 
 VERSION	?= minor
 MAIN_BRANCH = master
+STAGE_BRANCH = develop
 
 .PHONY: release
 VPART?=minor
 # target: release - Bump version
 release:
-	git checkout master
+	git checkout $(MAIN_BRANCH)
 	git pull
-	git checkout develop
+	git checkout $(STAGE_BRANCH)
 	git pull
 	uvx bump-my-version bump $(VPART)
 	uv lock
@@ -59,14 +60,15 @@ release:
 		{ \
 			printf 'build(release): %s\n\n' "$$VERSION"; \
 			printf 'Changes:\n\n'; \
-			git log --oneline --pretty=format:'%s [%an]' $(MAIN_BRANCH)..develop | grep -Evi 'github|^Merge' || true; \
+			git log --oneline --pretty=format:'%s [%an]' $(MAIN_BRANCH)..$(STAGE_BRANCH) | grep -Evi 'github|^Merge' || true; \
 		} | git commit -a -F -; \
-		git tag "$$VERSION";
+		git tag -a "$$VERSION" -m "$$VERSION";
 	git checkout $(MAIN_BRANCH)
-	git merge develop
-	git checkout develop
+	git merge $(STAGE_BRANCH)
+	git checkout $(STAGE_BRANCH)
 	git merge $(MAIN_BRANCH)
-	git push origin develop $(MAIN_BRANCH) --tags
+	@git -c push.followTags=false push origin $(STAGE_BRANCH) $(MAIN_BRANCH)
+	@git push --tags origin
 	@echo "Release process complete for `uv version --short`"
 
 .PHONY: minor
