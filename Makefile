@@ -41,6 +41,10 @@ lint: $(VIRTUAL_ENV)
 	@make types
 	@uv run ruff check
 
+.PHONY: link
+# target: link - Alias for lint
+link: lint
+
 .PHONY: example
 example: $(VIRTUAL_ENV)
 	@uv run muffin example peewee_migrate

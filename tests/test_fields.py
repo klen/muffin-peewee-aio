@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Type
 
 import peewee
 
-from muffin_peewee import Choices, IntEnumField, JSONPGField, StrEnumField
+from muffin_peewee import Choices, IntEnumField, JSONAsyncPGField, JSONPGField, StrEnumField
 from muffin_peewee.fields import DateTimeTZField, JSONSQLiteField
 
 if TYPE_CHECKING:
@@ -32,10 +32,13 @@ async def test_json_field(db: Plugin, transaction: ABCTransaction, model_cls: Ty
     test = await Test.select().where(Test.json["key"] == "value").get()
     assert test.json == {"key": "value"}
 
-    assert isinstance(db.JSONField({}), JSONSQLiteField)
-
-    db.manager.backend.db_type = "postgresql"  # type: ignore[misc]
-    assert isinstance(db.JSONField({}), JSONPGField)
+    backend = db.manager.backend.name  # type: ignore[misc]
+    if backend == "aiosqlite":
+        assert isinstance(db.JSONField({}), JSONSQLiteField)
+    elif backend in ("aiopg", "aiopg+pool"):
+        assert isinstance(db.JSONField({}), JSONPGField)
+    elif backend in ("asyncpg", "asyncpg+pool"):
+        assert isinstance(db.JSONField({}), JSONAsyncPGField)
 
     f1 = db.JSONField({})
     f2 = db.JSONField({})

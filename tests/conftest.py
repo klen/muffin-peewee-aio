@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 import muffin
 import pytest
@@ -23,6 +24,21 @@ def aiolib():
     return ("asyncio", {"loop_factory": None})
 
 
+BACKEND_URLS: dict[str, str] = {
+    "aiopg": "aiopg://test:test@localhost:5432/tests",
+    "asyncpg": "asyncpg://test:test@localhost:5432/tests",
+}
+
+BACKEND_PARAMS = {
+    "asyncpg": {"json": True},
+}
+
+
+@pytest.fixture(scope="session", params=["aiosqlite", *BACKEND_URLS])
+def backend(request):
+    return request.param
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _setup_logging():
 
@@ -38,9 +54,14 @@ def app() -> Application:
 
 
 @pytest.fixture
-async def db(app: Application) -> Plugin:
+async def db(app: Application, backend, tmp_path) -> Plugin:
+    if backend == "aiosqlite":
+        url = f"aiosqlite:///test-aio-db-{tmp_path.name}-{uuid4().hex}.sqlite"
+    else:
+        url = BACKEND_URLS[backend]
 
-    return muffin_peewee.Plugin(app)
+    params = BACKEND_PARAMS.get(backend, {})
+    return muffin_peewee.Plugin(app, connection=url, connection_params=params)
 
 
 @pytest.fixture

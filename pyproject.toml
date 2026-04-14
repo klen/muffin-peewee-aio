@@ -34,14 +34,17 @@ Repository = "https://github.com/klen/muffin-peewee"
 
 [dependency-groups]
 dev = [
+  "aiopg",
+  "aiosqlite",
+  "asyncpg",
+  "ipdb",
+  "pendulum",
+  "pre-commit",
+  "pyrefly",
   "pytest",
   "pytest-aio",
-  "aiosqlite",
-  "uvicorn",
   "ruff",
-  "pre-commit",
-  "pendulum",
-  "pyrefly",
+  "uvicorn",
 ]
 
 [tool.uv]

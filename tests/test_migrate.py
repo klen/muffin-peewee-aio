@@ -1,3 +1,11 @@
+import pytest
+
+
+@pytest.fixture
+def backend():
+    return "aiosqlite"
+
+
 async def test_cli(app, db):
     assert "peewee-create" in app.manage.commands
     assert "peewee-migrate" in app.manage.commands

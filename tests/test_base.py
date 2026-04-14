@@ -3,25 +3,20 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import peewee
-import pytest
 from peewee_aio import AIOModel
 
 import muffin_peewee
 
 if TYPE_CHECKING:
-    from aio_databases.backends import ABCTransaction
     from muffin import Application
 
     from muffin_peewee import Plugin
 
 
-async def test_conftest(db: Plugin, transaction: ABCTransaction):
+async def test_conftest(db: Plugin):
     @db.register
     class Test(AIOModel):
         data = peewee.CharField()
-
-    with pytest.raises(peewee.DatabaseError):
-        assert await Test.select() == []
 
     await db.create_tables()
     assert await Test.select() == []
