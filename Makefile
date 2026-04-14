@@ -79,9 +79,9 @@ release:
 	git merge $(STAGE_BRANCH)
 	git checkout $(STAGE_BRANCH)
 	git merge $(MAIN_BRANCH)
-	@git -c push.followTags=false push origin $(STAGE_BRANCH) $(MAIN_BRANCH)
 	@VERSION="$$(uv version --short)"; \
-		git push origin "refs/tags/$$VERSION"
+		git rev-parse -q --verify "refs/tags/$$VERSION" >/dev/null || git tag -a "$$VERSION" -m "$$VERSION"; \
+		git push --atomic origin $(STAGE_BRANCH) $(MAIN_BRANCH) "refs/tags/$$VERSION"
 	@echo "Release process complete for `uv version --short`"
 
 .PHONY: minor
