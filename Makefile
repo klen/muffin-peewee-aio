@@ -72,15 +72,13 @@ release:
 			printf 'build(release): %s\n\n' "$$VERSION"; \
 			printf 'Changes:\n\n'; \
 			git log --oneline --pretty=format:'%s [%an]' $(MAIN_BRANCH)..$(STAGE_BRANCH) | grep -Evi 'github|^Merge' || true; \
-		} | git commit -a -F -; \
-		git tag -a "$$VERSION" -m "$$VERSION"; \
-		git rev-parse -q --verify "refs/tags/$$VERSION" >/dev/null
+		} | git commit -a -F -
 	git checkout $(MAIN_BRANCH)
 	git merge $(STAGE_BRANCH)
 	git checkout $(STAGE_BRANCH)
 	git merge $(MAIN_BRANCH)
 	@VERSION="$$(uv version --short)"; \
-		git rev-parse -q --verify "refs/tags/$$VERSION" >/dev/null || git tag -a "$$VERSION" -m "$$VERSION"; \
+		git tag -a "$$VERSION" -m "$$VERSION"; \
 		git push --atomic origin $(STAGE_BRANCH) $(MAIN_BRANCH) "refs/tags/$$VERSION"
 	@echo "Release process complete for `uv version --short`"
 
