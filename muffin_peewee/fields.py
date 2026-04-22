@@ -26,6 +26,9 @@ class JSONAsyncPGField(JSONPGField[TV]):
     def db_value(self, value):
         return value
 
+    def to_value(self, value, *_, **__):
+        return value
+
 
 class JSONSQLiteField(JSONGenericField[TV], SQLiteJSONField):  # type: ignore[inconsistent-inheritance]
     pass

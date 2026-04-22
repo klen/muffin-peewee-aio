@@ -45,6 +45,7 @@ dev = [
   "pytest-aio",
   "ruff",
   "uvicorn",
+  "types-peewee",
 ]
 
 [tool.uv]

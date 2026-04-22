@@ -25,6 +25,7 @@ def aiolib():
 
 
 BACKEND_URLS: dict[str, str] = {
+    "aiosqlite": "aiosqlite:///:memory:",
     "aiopg": "aiopg://test:test@localhost:5432/tests",
     "asyncpg": "asyncpg://test:test@localhost:5432/tests",
 }
