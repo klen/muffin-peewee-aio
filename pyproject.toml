@@ -20,7 +20,12 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
   "Framework :: AsyncIO",
 ]
-dependencies = ["muffin", "peewee", "peewee-aio", "peewee-migrate"]
+dependencies = [
+    "muffin",
+    "peewee",
+    "peewee-aio",
+    "peewee-migrate",
+]
 
 [project.optional-dependencies]
 aiopg = ["aiopg"]

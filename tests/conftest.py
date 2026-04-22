@@ -57,7 +57,7 @@ def app() -> Application:
 @pytest.fixture
 async def db(app: Application, backend, tmp_path) -> Plugin:
     if backend == "aiosqlite":
-        url = f"aiosqlite:///test-aio-db-{tmp_path.name}-{uuid4().hex}.sqlite"
+        url = f"aiosqlite:///{tmp_path}-test-aio-db-{uuid4().hex}.sqlite"
     else:
         url = BACKEND_URLS[backend]
 
