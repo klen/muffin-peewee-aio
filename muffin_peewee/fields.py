@@ -26,7 +26,10 @@ class JSONAsyncPGField(JSONPGField[TV]):
     def db_value(self, value):
         return value
 
-    def to_value(self, value, *_, **__):
+    def to_value(self, value, *_, **__):  # type: ignore[]
+        return pw.Value(value, self.db_value, unpack=False)
+
+    def python_value(self, value):
         return value
 
 
