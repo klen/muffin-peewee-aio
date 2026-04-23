@@ -1,7 +1,10 @@
+import shutil
 from unittest import mock
 
 import muffin
 import peewee
+import pytest
+from aio_databases import ReadOnlyError
 
 import muffin_peewee
 
@@ -46,16 +49,26 @@ async def test_replica_context_manager(tmp_path):
     db = muffin_peewee.Plugin(app)
 
     @db.register
-    class User(peewee.Model):
+    class User(db.Model):
         name = peewee.CharField()
 
-    async with db.manager, db.manager.connection():
+    async with db.manager:
         await db.manager.create_tables(User)
-        user = User(name="test")
-        await db.manager.save(user)
+        await User.create(name="common")
+        # Copy the file to the replica, using OS commands to avoid locking issues with SQLite
+        shutil.copyfile(tmp_path / "db.sqlite", tmp_path / "replica.sqlite")
+        await User.create(name="primary")
 
     async with db.replica():
         assert db.manager.current_conn
+        assert db.manager.current_conn.read_only
+        users = await User.select()
+        assert len(users) == 1
+        for user in users:
+            assert user.name == "common"
+
+        with pytest.raises(ReadOnlyError):
+            await User.create(name="should_fail")
 
 
 async def test_auto_connect(tmp_path):
