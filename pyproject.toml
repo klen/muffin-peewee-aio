@@ -1,6 +1,6 @@
 [project]
 name = "muffin-peewee-aio"
-version = "2.4.6"
+version = "2.5.0"
 description = "Peewee-AIO integration for Muffin framework"
 authors = [{ name = "Kirill Klenov", email = "horneds@gmail.com" }]
 requires-python = ">=3.10,<4"
@@ -113,7 +113,7 @@ ignore = [
 "tests/*" = ["ARG"]
 
 [tool.bumpversion]
-current_version = "2.4.6"
+current_version = "2.5.0"
 commit = false
 tag = false
 
