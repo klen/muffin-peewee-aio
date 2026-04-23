@@ -66,6 +66,8 @@ You can provide options either at initialization or through the application conf
 +------------------------+-----------------------------------------+----------------------------------------------------+
 | **CONNECTION_PARAMS**  | ``{}``                                  | Extra options passed to the database backend       |
 +------------------------+-----------------------------------------+----------------------------------------------------+
+| **REPLICAS**           | ``None``                                | List of read-replica connection URLs               |
++------------------------+-----------------------------------------+----------------------------------------------------+
 | **AUTO_CONNECTION**    | ``True``                                | Automatically acquire a DB connection per request  |
 +------------------------+-----------------------------------------+----------------------------------------------------+
 | **AUTO_TRANSACTION**   | ``True``                                | Automatically wrap each request in a transaction   |
@@ -115,6 +117,31 @@ To manage them manually, disable the config flags and use context managers:
             async with db.transaction():
                 # Perform DB operations here
                 ...
+
+Read Replicas
+=============
+
+You can configure read replicas via the ``REPLICAS`` option:
+
+.. code-block:: python
+
+    db.setup(
+        app,
+        PEEWEE_CONNECTION="postgresql://...",
+        PEEWEE_REPLICAS=[
+            "postgresql://replica1/...",
+            "postgresql://replica2/...",
+        ],
+    )
+
+Use ``db.replica()`` to open a read-only connection to a replica backend:
+
+.. code-block:: python
+
+    @app.route("/")
+    async def view(request):
+        async with db.replica():
+            return [t.data async for t in Test.select()]
 
 Migrations
 ==========

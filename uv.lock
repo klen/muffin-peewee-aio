@@ -9,14 +9,14 @@ resolution-markers = [
 
 [[package]]
 name = "aio-databases"
-version = "1.4.3"
+version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/85/8b/132249384451f47c12daad9faf5c8169a4152e2b189487571b59509e9fd4/aio_databases-1.4.3.tar.gz", hash = "sha256:f5a8aafa68d42a998625de908851d16fbafacb1b681bfdaa445b8d2199c1599e", size = 10475, upload-time = "2026-04-22T13:59:18.911Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ff/56/459dfc0b502b38c620c5b9866f0ed7a689c9eb642a1d8216ffd1bb73b46a/aio_databases-1.6.0.tar.gz", hash = "sha256:a2a8d062609ff44d55aeb1d9f7fee9a79b19133ea7d13d8f1c1eadb7967b09d5", size = 11204, upload-time = "2026-04-22T23:57:52.34Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/35/45/108e05adb5501a339984e62c7ec3f7ff4f157cdee3b6a8ff422ff3eed21a/aio_databases-1.4.3-py3-none-any.whl", hash = "sha256:a3a86c4cc14e36edfef0e1a56324ad0cb9d354918ff1da9d0376e10f9a6069a1", size = 16434, upload-time = "2026-04-22T13:59:17.293Z" },
+    { url = "https://files.pythonhosted.org/packages/70/72/d78a0ed8477718556697a2e7777e6634a62c89866984c2f181d02023c2bf/aio_databases-1.6.0-py3-none-any.whl", hash = "sha256:9e135984c4fcdb0d849681d2cd8319568094b1e6b7b645aa32a3d04367d43802", size = 17179, upload-time = "2026-04-22T23:57:53.172Z" },
 ]
 
 [[package]]

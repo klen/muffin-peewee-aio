@@ -51,6 +51,7 @@ class Plugin(BasePlugin):
         # Connection params
         "connection": "aiosqlite:///db.sqlite",
         "connection_params": {},
+        "replicas": None,
         # Manage connections automatically
         "auto_connection": True,
         "auto_transaction": True,
@@ -71,7 +72,9 @@ class Plugin(BasePlugin):
         super().setup(app, **options)
 
         # Init manager and rebind models
-        manager = Manager(self.cfg.connection, **self.cfg.connection_params)
+        params = dict(self.cfg.connection_params)
+        params.setdefault("replicas", self.cfg.replicas)
+        manager = Manager(self.cfg.connection, **params)
         for model in list(self.manager):
             manager.register(model)
         self.manager = manager
@@ -163,6 +166,9 @@ class Plugin(BasePlugin):
 
     def transaction(self, *params, **opts) -> TransactionContext:
         return self.manager.transaction(*params, **opts)
+
+    def replica(self, *params, **opts) -> ConnectionContext:
+        return self.manager.replica(*params, **opts)
 
     async def create_tables(self, *models_cls: type[pw.Model]):
         """Create SQL tables."""

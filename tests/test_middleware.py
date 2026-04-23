@@ -23,6 +23,41 @@ async def test_lifespan():
         assert mock_disconnect.await_count == 1
 
 
+async def test_replica_config(tmp_path):
+
+    app = muffin.Application(
+        "peewee",
+        PEEWEE_CONNECTION=f"sqlite:///{tmp_path / 'db.sqlite'}",
+        PEEWEE_REPLICAS=[f"sqlite:///{tmp_path / 'replica.sqlite'}"],
+    )
+    db = muffin_peewee.Plugin(app)
+
+    assert db.manager.replica_backends
+    assert len(db.manager.replica_backends) == 1
+
+
+async def test_replica_context_manager(tmp_path):
+
+    app = muffin.Application(
+        "peewee",
+        PEEWEE_CONNECTION=f"sqlite:///{tmp_path / 'db.sqlite'}",
+        PEEWEE_REPLICAS=[f"sqlite:///{tmp_path / 'replica.sqlite'}"],
+    )
+    db = muffin_peewee.Plugin(app)
+
+    @db.register
+    class User(peewee.Model):
+        name = peewee.CharField()
+
+    async with db.manager, db.manager.connection():
+        await db.manager.create_tables(User)
+        user = User(name="test")
+        await db.manager.save(user)
+
+    async with db.replica():
+        assert db.manager.current_conn
+
+
 async def test_auto_connect(tmp_path):
 
     app = muffin.Application(
