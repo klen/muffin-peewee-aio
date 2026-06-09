@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 from copy import copy
 from typing import TYPE_CHECKING, Callable, ClassVar, Literal, overload
 
-import click
 import peewee as pw
 from aio_databases.database import ConnectionContext, TransactionContext
 from muffin.plugins import BasePlugin, PluginNotInstalledError
@@ -23,6 +22,7 @@ from .fields import (
     StrEnumField,
     URLField,
 )
+from .migrations import setup_migrations
 from .types import TV
 
 if TYPE_CHECKING:
@@ -67,7 +67,7 @@ class Plugin(BasePlugin):
         "dummy://localhost",
     )  # Dummy manager for support registration
 
-    def setup(self, app: "Application", **options):  # noqa: C901
+    def setup(self, app: "Application", **options):
         """Init the plugin."""
         super().setup(app, **options)
 
@@ -79,63 +79,7 @@ class Plugin(BasePlugin):
             manager.register(model)
         self.manager = manager
 
-        if self.cfg.migrations_enabled:
-            router = Router(manager.pw_database, migrate_dir=self.cfg.migrations_path)
-            self.router = router
-
-            # Register migration commands
-            @app.manage
-            def peewee_migrate(name: str = "", *, fake: bool = False):
-                """Run application's migrations.
-
-                :param name: Choose a migration' name
-                :param fake: Run as fake. Update migration history and don't touch the database
-                """
-                with manager.allow_sync():
-                    router.run(name, fake=fake)
-
-            @app.manage
-            def peewee_create(name: str = "auto", *, auto: bool = False):
-                """Create a migration.
-
-                :param name: Set name of migration [auto]
-                :param auto: Track changes and setup migrations automatically
-                """
-                with manager.allow_sync():
-                    router.create(name, auto=auto and list(self.manager.models))
-
-            @app.manage
-            def peewee_rollback():
-                """Rollback the latest migration."""
-                with manager.allow_sync():
-                    router.rollback()
-
-            @app.manage
-            def peewee_list():
-                """List migrations."""
-                click.secho("List of migrations:\n", fg="blue")
-                with manager.allow_sync():
-                    for migration in router.done:
-                        click.echo(f"- [x] {migration}")
-
-                    for migration in router.diff:
-                        click.echo(f"- [ ] {migration}")
-
-                    click.secho(
-                        f"\nDone: {len(router.done)}, Pending: {len(router.diff)}", fg="blue"
-                    )
-
-            @app.manage
-            def peewee_clear():
-                """Clear migrations from DB."""
-                with manager.allow_sync():
-                    self.router.clear()
-
-            @app.manage
-            def peewee_merge(name: str = "initial"):
-                """Merge all migrations into one."""
-                with manager.allow_sync():
-                    self.router.merge(name)
+        setup_migrations(self, app, manager)
 
         if self.cfg.auto_connection:
             app.middleware(self.get_middleware(), insert_first=True)
