@@ -173,7 +173,7 @@ with suppress(ImportError):
                 return value.astimezone(UTC).naive()
 
             if isinstance(value, datetime):
-                return value
+                return value.astimezone(UTC).replace(tzinfo=None)
 
             raise ValueError("Invalid datetime value")
 
