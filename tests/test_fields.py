@@ -238,6 +238,19 @@ def test_datetime_tz_field_with_pendulum():
     assert isinstance(py_value, pendulum.DateTime)
 
 
+def test_datetime_tz_field_with_naive():
+    field = DateTimeTZField()
+    now = dt.datetime.now()  # noqa: DTZ005
+
+    db_value = field.db_value(now)
+    assert db_value == now
+
+    now = dt.datetime.now(dt.timezone(dt.timedelta(hours=3)))
+    db_value = field.db_value(now)
+    assert db_value.tzinfo is None
+    assert db_value == now.astimezone(dt.timezone.utc).replace(tzinfo=None)
+
+
 def test_datetime_tz_field_invalid_value_raises():
     field = DateTimeTZField()
     with pytest.raises(ValueError, match="Invalid datetime value"):
