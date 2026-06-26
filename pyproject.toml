@@ -3,7 +3,7 @@ name = "muffin-peewee-aio"
 version = "2.5.2"
 description = "Peewee-AIO integration for Muffin framework"
 authors = [{ name = "Kirill Klenov", email = "horneds@gmail.com" }]
-requires-python = ">=3.10,<4"
+requires-python = ">=3.11,<4"
 readme = "README.md"
 license = "MIT"
 keywords = ["peewee", "sql", "orm", "asyncio", "muffin"]
@@ -13,7 +13,6 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -71,7 +70,7 @@ log_cli = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py310,py311,py312,py313
+envlist = py311,py312,py313
 
 [testenv]
 deps = -e .[tests]
@@ -86,7 +85,7 @@ project-includes = ["muffin_peewee"]
 include = ["muffin_peewee/*", "tests/**/*"]
 exclude = ["example"]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 exclude = [".venv", "docs", "example"]

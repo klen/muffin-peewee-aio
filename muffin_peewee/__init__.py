@@ -2,7 +2,7 @@
 
 from contextlib import asynccontextmanager
 from copy import copy
-from typing import TYPE_CHECKING, Callable, ClassVar, Literal, overload
+from typing import TYPE_CHECKING, Callable, ClassVar, Literal, Self, overload
 
 import peewee as pw
 from aio_databases.database import ConnectionContext, TransactionContext
@@ -92,7 +92,7 @@ class Plugin(BasePlugin):
         """Disconnect from the database (close a pool and etc.)."""
         await self.manager.disconnect()
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         """Connect the database."""
         await self.manager.connect()
         return self
