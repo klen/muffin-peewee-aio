@@ -26,4 +26,4 @@
 - Conventional Commits are enforced by pre-commit using `.git-commits.yaml`.
 - Pre-commit checks lockfile freshness via `uv-lock --check`; update `uv.lock` when dependencies change.
 - `pre-push` hook runs `poetry run pytest` (not `uv`), so pushes may fail if Poetry is unavailable.
-- `make release` assumes `develop` and `master`, bumps with `uvx bump-my-version`, then tags and pushes both branches and tags.
+- `make release` assumes `develop` and `main`, bumps with `uvx bump-my-version`, then tags and pushes both branches and tags.
