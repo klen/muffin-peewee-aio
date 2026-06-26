@@ -54,7 +54,7 @@ example: $(VIRTUAL_ENV)
 #  Bump version
 # ==============
 
-MAIN_BRANCH = master
+MAIN_BRANCH = main
 STAGE_BRANCH = develop
 
 .PHONY: release
