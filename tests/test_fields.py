@@ -50,9 +50,7 @@ async def test_json_field_returns_correct_backend_type(db: Plugin):
     expected_types = {
         "aiosqlite": JSONSQLiteField,
         "aiopg": JSONPGField,
-        "aiopg+pool": JSONPGField,
         "asyncpg": JSONAsyncPGField,
-        "asyncpg+pool": JSONAsyncPGField,
     }
 
     expected = expected_types.get(backend)
@@ -60,6 +58,18 @@ async def test_json_field_returns_correct_backend_type(db: Plugin):
         pytest.fail(f"Unexpected backend: {backend}")
 
     assert isinstance(db.JSONField({}), expected)
+
+
+async def test_json_field_returns_correct_backend_type_for_asyncpg_pool(app):
+    import muffin_peewee
+
+    db = muffin_peewee.Plugin(
+        app,
+        connection="asyncpg+pool://test:test@localhost:5432/tests",
+        connection_params={"json": True},
+    )
+    assert db.manager.backend.name == "asyncpg+pool"
+    assert isinstance(db.JSONField({}), JSONAsyncPGField)
 
 
 async def test_json_field_defaults_are_independent(db: Plugin):

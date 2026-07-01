@@ -164,7 +164,7 @@ class Plugin(BasePlugin):
         factory = lambda: copy(default) if isinstance(default, (dict, list)) else default  # noqa: E731
 
         backend = self.manager.backend
-        if backend.name == "asyncpg":
+        if backend.name in ("asyncpg", "asyncpg+pool"):
             return JSONAsyncPGField(default=factory, **kwargs)
 
         if backend.db_type == "postgresql":
