@@ -5,6 +5,7 @@ import uuid
 from enum import Enum
 from typing import TYPE_CHECKING, Type
 
+import muffin
 import peewee
 import pendulum
 import pytest
@@ -14,6 +15,7 @@ from muffin_peewee import (
     IntEnumField,
     JSONAsyncPGField,
     JSONPGField,
+    Plugin,
     StrEnumField,
     URLField,
 )
@@ -22,8 +24,6 @@ from muffin_peewee.fields import DateTimeTZField, JSONLikeField, JSONSQLiteField
 if TYPE_CHECKING:
     from aio_databases.backends import ABCTransaction
     from peewee_aio import AIOModel
-
-    from muffin_peewee import Plugin
 
 
 async def test_json_field_save_and_query(
@@ -60,6 +60,23 @@ async def test_json_field_returns_correct_backend_type(db: Plugin):
         pytest.fail(f"Unexpected backend: {backend}")
 
     assert isinstance(db.JSONField({}), expected)
+
+
+@pytest.mark.parametrize(
+    ("url", "expected"),
+    [
+        ("sqlite:///:memory:", JSONSQLiteField),
+        ("aiosqlite:///:memory:", JSONSQLiteField),
+        ("aiopg://user:pass@localhost/db", JSONPGField),
+        ("aiopg+pool://user:pass@localhost/db", JSONPGField),
+        ("asyncpg://user:pass@localhost/db", JSONAsyncPGField),
+        ("asyncpg+pool://user:pass@localhost/db", JSONAsyncPGField),
+    ],
+)
+def test_json_field_backend_mapping(url: str, expected: type):
+    db = Plugin(muffin.Application(), connection=url, migrations_enabled=False)
+
+    assert type(db.JSONField({})) is expected
 
 
 async def test_json_field_defaults_are_independent(db: Plugin):
