@@ -14,7 +14,8 @@
 - Local shortcuts: `make lint` (runs `make types` then `ruff`) and `make test`.
 
 ## Testing gotchas
-- `tests/conftest.py` parametrizes `backend` across `aiosqlite`, `aiopg`, and `asyncpg` for most DB tests.
+- `tests/conftest.py` parametrizes `backend` across `aiosqlite`, `aiopg`, and `asyncpg` for most DB tests (`aiosqlite` is listed twice, so its cases run twice).
+- Changes to backend-specific fields (JSON, enums) need all three backends; the `aiosqlite`-only tests (`tests/test_middleware.py`, tests without the `db` fixture) are not enough.
 - Full test suite expects Postgres at `localhost:5432`, database `tests`, user/password `test:test` (for `aiopg` + `asyncpg` cases).
 - Fast DB-light checks: `uv run pytest tests/test_middleware.py tests/test_migrate.py`.
 
@@ -25,5 +26,5 @@
 ## Commit/release workflow quirks
 - Conventional Commits are enforced by pre-commit using `.git-commits.yaml`.
 - Pre-commit checks lockfile freshness via `uv-lock --check`; update `uv.lock` when dependencies change.
-- `pre-push` hook runs `poetry run pytest` (not `uv`), so pushes may fail if Poetry is unavailable.
+- `pre-push` hook runs `uv run pytest` (see `.pre-commit-config.yaml`), so a push also runs the full suite, Postgres included.
 - `make release` assumes `develop` and `main`, bumps with `uvx bump-my-version`, then tags and pushes both branches and tags.
