@@ -49,8 +49,6 @@ dev = [
   "pytest-aio",
   "ruff",
   "uvicorn",
-  "types-peewee",
-  "pytest-cov>=7.1.0",
 ]
 
 [tool.uv]
@@ -60,22 +58,25 @@ module-name = ["muffin_peewee"]
 module-root = ""
 
 [build-system]
-requires = ["uv_build>=0.9.7,<0.10.0"]
+requires = ["uv_build>=0.13.6,<0.14.0"]
 build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 addopts = "-xsv"
-log_cli = true
 
+# PostgreSQL cases need a local server (localhost:5432, tests/test:test), see AGENTS.md
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py311,py312,py313
+envlist = py311,py312,py313,py314,py315,pypy311
 
 [testenv]
-deps = -e .[tests]
+allowlist_externals = uv,pytest
+setenv =
+  UV_PROJECT_ENVIRONMENT = {envdir}
 commands =
-	pytest tests
+  uv sync --locked --all-extras
+  pytest tests
 """
 
 [tool.pyrefly]
