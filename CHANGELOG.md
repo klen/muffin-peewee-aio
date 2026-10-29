@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A disabled plugin no longer installs the request middleware and migration commands.
+- Enum fields accept raw values: `Model.select().where(Model.status == "active")`.
+- JSON field defaults are deep-copied, so nested lists/dicts are not shared between instances.
+- `Plugin.conftest()` drops the tables when a test raises.
+- README: the request middleware uses one connection, not two; migrations need a synchronous driver.
+
+### Changed
+
+- Removed dead code (`JSONAsyncSQLiteField`, `TFactory`, `from_isoformat`), unused dev dependencies
+  (`types-peewee`, `pytest-cov`) and the removed pytest `log_cli` option.
+
 ## [3.0.0] - 2026-06-26
 
 ### Changed

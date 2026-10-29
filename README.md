@@ -247,14 +247,6 @@ async def view(request):
     return "ok"
 ```
 
-Implementation note: the middleware uses the chained form
-`async with self.connection(), self.transaction()`. Both context objects are created before either
-is entered, so `transaction()` does not see the middleware connection and takes a second connection
-from the pool. Queries in the handler use the transaction's connection; the first connection stays
-idle until the request ends. This is not a correctness problem, but a request holds two connections
-instead of one. If that matters, set `AUTO_CONNECTION=False` and add your own middleware with
-nested `db.connection()` / `db.transaction()` contexts.
-
 Request-independent code (CLI commands, background jobs) is not wrapped by the middleware. Open the
 contexts explicitly:
 
@@ -286,16 +278,14 @@ exception.
 - `silent=True`: do not raise when committing/rolling back a connection that is already closed.
 - A transaction opened on a connection that already has one becomes a `SAVEPOINT`.
 
-Nest the contexts when you need them together. Chaining them as
-`async with db.connection(), db.transaction()` acquires two connections, because both objects are
-built before the first one is entered:
+Chaining them as `async with db.connection(), db.transaction()` uses a single connection: the
+connection is acquired before the transaction is created, so the transaction reuses it.
 
 ```python
 @app.route("/")
 async def view(request):
-    async with db.connection():
-        async with db.transaction():
-            ...
+    async with db.connection(), db.transaction():
+        ...
 ```
 
 ## Read Replicas
@@ -316,7 +306,9 @@ db = Peewee(
 `CONNECTION_PARAMS` is applied to every replica backend too.
 
 `db.replica()` opens a **new** connection to one of the replicas (it does not reuse the request's
-connection) and yields it. The replica is picked with `random.choice`: it is not round-robin, there
+connection) and yields it. With a plain `asyncpg://` or `aiopg://` URL every call opens and closes a
+driver connection; use the pooled schemes (`asyncpg+pool://`, `aiopg+pool://`) for replicas unless
+they are rarely read. The replica is picked with `random.choice`: it is not round-robin, there
 are no health checks and no automatic read/write splitting. The connection is flagged read-only, so
 writes raise `aio_databases.ReadOnlyError`.
 
@@ -335,6 +327,10 @@ using the primary connection.
 
 The plugin creates a `peewee_migrate.Router` during `setup()` (available as `db.router`) and
 registers the CLI commands when `MIGRATIONS_ENABLED` is true. Set it to `False` to skip both.
+
+The commands run Peewee's synchronous API (`manager.allow_sync()`), which needs a synchronous driver
+next to the asynchronous one: `psycopg2` for PostgreSQL and `pymysql` for MySQL. The `aiopg` extra
+installs `psycopg2`; the `asyncpg` and `aiomysql` extras do not, so add it yourself.
 
 Create a migration:
 

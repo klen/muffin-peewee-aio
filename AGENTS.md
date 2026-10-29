@@ -14,7 +14,7 @@
 - Local shortcuts: `make lint` (runs `make types` then `ruff`) and `make test`.
 
 ## Testing gotchas
-- `tests/conftest.py` parametrizes `backend` across `aiosqlite`, `aiopg`, and `asyncpg` for most DB tests (`aiosqlite` is listed twice, so its cases run twice).
+- `tests/conftest.py` parametrizes `backend` across `aiosqlite`, `aiopg`, and `asyncpg` for most DB tests.
 - Changes to backend-specific fields (JSON, enums) need all three backends; the `aiosqlite`-only tests (`tests/test_middleware.py`, tests without the `db` fixture) are not enough.
 - Full test suite expects Postgres at `localhost:5432`, database `tests`, user/password `test:test` (for `aiopg` + `asyncpg` cases).
 - Fast DB-light checks: `uv run pytest tests/test_middleware.py tests/test_migrate.py`.
