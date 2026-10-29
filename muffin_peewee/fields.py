@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from contextlib import suppress
 from datetime import datetime, timezone
-from enum import EnumMeta
+from enum import Enum, EnumMeta
 from typing import TYPE_CHECKING, Any, Generic, Literal, cast, overload
 
 import peewee as pw
@@ -35,11 +35,6 @@ class JSONAsyncPGField(JSONPGField[TV]):
 
 class JSONSQLiteField(JSONGenericField[TV], SQLiteJSONField):  # type: ignore[inconsistent-inheritance]
     pass
-
-
-class JSONAsyncSQLiteField(JSONSQLiteField):
-    def db_value(self, value):
-        return value
 
 
 class JSONLikeField(JSONGenericField[TV], pw.Field):
@@ -90,7 +85,7 @@ class EnumMixin(Generic[TV]):
         if value is None:
             return value
 
-        return value.value
+        return value.value if isinstance(value, Enum) else value
 
     def python_value(self, value: TV | None):
         """Convert database value to python."""
@@ -146,10 +141,12 @@ with suppress(ImportError):
     sqlite_register(DateTime, lambda dt: dt.isoformat())
 
     UTC = timezone.utc
-    from_isoformat = datetime.fromisoformat
 
     class DateTimeTZField(GenericField[TV], pw.DateTimeField):
-        """DateTime field with timezone support."""
+        """DateTime field with timezone support (requires pendulum).
+
+        Naive datetimes are stored and read back as UTC.
+        """
 
         if TYPE_CHECKING:
 

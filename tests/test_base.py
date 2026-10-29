@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import peewee
+import pytest
 from peewee_aio import AIOModel
 
 import muffin_peewee
@@ -57,3 +58,29 @@ async def test_conftest_without_setup_db(app: Application):
     db = muffin_peewee.Plugin(app, pytest_setup_db=False)
     async with db.conftest() as plugin:
         assert plugin is db
+
+
+async def test_disabled_plugin_is_not_wired(app: Application):
+    db = muffin_peewee.Plugin(app, disabled=True)
+
+    assert db.cfg.disabled
+    assert not app.internal_middlewares
+    assert not [name for name in app.manage.commands if name.startswith("peewee-")]
+
+
+async def test_conftest_drops_tables_after_failure(db: Plugin):
+    @db.register
+    class Row(peewee.Model):
+        name = peewee.CharField()
+
+    async def failing_test():
+        async with db.conftest():
+            await Row.create(name="left over")
+            raise RuntimeError("test failed")
+
+    with pytest.raises(RuntimeError):
+        await failing_test()
+
+    async with db, db.connection():
+        await db.create_tables(Row)
+        assert await db.manager.count(Row.select()) == 0

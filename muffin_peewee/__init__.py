@@ -1,7 +1,7 @@
 """Support Peewee ORM for Muffin framework."""
 
 from contextlib import asynccontextmanager
-from copy import copy
+from copy import deepcopy
 from typing import TYPE_CHECKING, Callable, ClassVar, Literal, Self, overload
 
 import peewee as pw
@@ -69,7 +69,8 @@ class Plugin(BasePlugin):
 
     def setup(self, app: "Application", **options):
         """Init the plugin."""
-        super().setup(app, **options)
+        if not super().setup(app, **options):
+            return False
 
         # Init manager and rebind models
         params = dict(self.cfg.connection_params)
@@ -77,6 +78,7 @@ class Plugin(BasePlugin):
         manager = Manager(self.cfg.connection, **params)
         for model in list(self.manager):
             manager.register(model)
+
         self.manager = manager
 
         setup_migrations(self, app, manager)
@@ -161,7 +163,7 @@ class Plugin(BasePlugin):
         if self.app is None:
             raise PluginNotInstalledError
 
-        factory = lambda: copy(default) if isinstance(default, (dict, list)) else default  # noqa: E731
+        factory = lambda: deepcopy(default) if isinstance(default, (dict, list)) else default  # noqa: E731
 
         backend = self.manager.backend
         if backend.name.startswith("asyncpg"):
@@ -181,7 +183,9 @@ class Plugin(BasePlugin):
         if self.cfg.pytest_setup_db:
             async with self, self.connection():
                 await self.create_tables()
-                yield self
-                await self.drop_tables()
+                try:
+                    yield self
+                finally:
+                    await self.drop_tables()
         else:
             yield self

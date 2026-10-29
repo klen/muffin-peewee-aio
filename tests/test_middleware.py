@@ -102,11 +102,12 @@ async def test_auto_connection_disabled(tmp_path):
     assert not app.internal_middlewares
 
 
-async def test_auto_transaction_disabled(tmp_path):
+@pytest.mark.parametrize(("auto_transaction", "kept"), [(True, 0), (False, 1)])
+async def test_middleware_commits_and_rolls_back(tmp_path, auto_transaction, kept):
     app = muffin.Application(
         "peewee",
         PEEWEE_CONNECTION=f"sqlite:///{tmp_path / 'db.sqlite'}",
-        PEEWEE_AUTO_TRANSACTION=False,
+        PEEWEE_AUTO_TRANSACTION=auto_transaction,
     )
     db = muffin_peewee.Plugin(app)
 
@@ -115,18 +116,24 @@ async def test_auto_transaction_disabled(tmp_path):
         name = peewee.CharField()
 
     manager = db.manager
-    async with manager, manager.connection(), manager.transaction() as trans:
+    async with manager, manager.connection():
         await manager.create_tables(User)
-        await manager.save(User(name="test"))
-        await trans.commit()
 
-    @app.route("/")
-    async def index(request):
-        return await manager.count(User.select())
+    @app.route("/save")
+    async def save(request):
+        await manager.save(User(name="saved"))
+        return "saved"
+
+    @app.route("/boom")
+    async def boom(request):
+        await manager.save(User(name="boom"))
+        raise ValueError("boom")
 
     client = muffin.TestClient(app)
     async with client.lifespan():
-        response = await client.get("/")
+        assert (await client.get("/save")).status_code == 200
+        assert (await client.get("/boom")).status_code == 500
 
-    assert response.status_code == 200
-    assert await response.text() == "1"
+    async with manager, manager.connection():
+        # The failed request is rolled back, unless AUTO_TRANSACTION is off
+        assert await manager.count(User.select()) == 1 + kept

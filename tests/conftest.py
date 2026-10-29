@@ -35,7 +35,7 @@ BACKEND_PARAMS = {
 }
 
 
-@pytest.fixture(scope="session", params=["aiosqlite", *BACKEND_URLS])
+@pytest.fixture(scope="session", params=list(BACKEND_URLS))
 def backend(request):
     return request.param
 

@@ -80,10 +80,12 @@ def test_json_field_backend_mapping(url: str, expected: type):
 
 
 async def test_json_field_defaults_are_independent(db: Plugin):
-    f1 = db.JSONField({})
-    f2 = db.JSONField({})
+    field = db.JSONField({"tags": []})
+    first, second = field.default(), field.default()
 
-    assert id(f1.default) != id(f2.default)
+    first["tags"].append(1)
+
+    assert second == {"tags": []}
 
 
 async def test_uuid_field_save_and_load(
@@ -137,6 +139,25 @@ async def test_enum_field_save_and_query(
 
     found_by_str = await Test.select().where(Test.str_enum << [StrEnum.a, StrEnum.b]).get()
     assert found_by_str == saved
+
+
+async def test_enum_field_accepts_raw_values(
+    db: Plugin, transaction: ABCTransaction, model_cls: Type[AIOModel]
+):
+    class StrEnum(Enum):
+        a = "A"
+
+    @db.register
+    class Test(model_cls):  # type: ignore[valid-type,misc]
+        data = peewee.CharField()
+        str_enum = StrEnumField(StrEnum)
+
+    await Test.create_table()
+
+    await Test.create(data="raw", str_enum="A")
+
+    found = await Test.select().where(Test.str_enum == "A").get()
+    assert found.str_enum == StrEnum.a
 
 
 def test_enum_field_choices():
