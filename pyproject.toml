@@ -17,6 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Framework :: AsyncIO",
 ]
 dependencies = [
@@ -92,6 +93,7 @@ target-version = "py311"
 exclude = [".venv", "docs", "example"]
 select = ["ALL"]
 ignore = [
+  "CPY001",
   "D",
   "UP",
   "ANN",

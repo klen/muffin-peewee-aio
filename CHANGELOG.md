@@ -4,6 +4,7 @@ All notable changes to this project. Newest first.
 
 ## 2026-11-03
 
+- Support Python 3.15 (classifiers and CI matrix); `CPY001` is ignored since the project has no copyright headers.
 - A disabled plugin no longer installs the request middleware and migration commands.
 - Enum fields accept raw values: `Model.select().where(Model.status == "active")`.
 - JSON field defaults are deep-copied, so nested lists/dicts are not shared between instances.
