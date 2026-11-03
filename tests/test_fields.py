@@ -11,7 +11,6 @@ import pendulum
 import pytest
 
 from muffin_peewee import (
-    Choices,
     IntEnumField,
     JSONAsyncPGField,
     JSONPGField,
@@ -189,38 +188,6 @@ def test_datetimetzfield():
     db_value = field.db_value(py_value)
 
     assert db_value.tzinfo is None
-
-
-def test_choices_from_strings():
-    choices = Choices("a", "b", "c")
-
-    assert choices.a == "a"
-    assert choices["a"] == "a"
-    assert choices("a") == "a"
-    assert list(choices) == [("a", "a"), ("b", "b"), ("c", "c")]
-
-
-def test_choices_from_dict():
-    choices = Choices({"a": "A", "b": "B", "c": "C"})
-
-    assert choices.a == "A"
-    assert choices["a"] == "A"
-    assert choices("A") == "a"
-    assert list(choices) == [("A", "a"), ("B", "b"), ("C", "c")]
-
-
-def test_choices_from_enum():
-    class MyEnum(Enum):
-        a = "A"
-        b = "B"
-        c = "C"
-
-    choices = Choices(MyEnum)
-
-    assert choices.a == "A"
-    assert choices["a"] == "A"
-    assert choices("A") == "a"
-    assert list(choices) == [("A", "a"), ("B", "b"), ("C", "c")]
 
 
 def test_url_field():

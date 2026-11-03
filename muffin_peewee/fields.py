@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from contextlib import suppress
 from datetime import datetime, timezone
-from enum import Enum, EnumMeta
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Generic, Literal, cast, overload
 
 import peewee as pw
@@ -186,55 +186,3 @@ with suppress(ImportError):
                 return instance(value)
 
             return value
-
-
-class Choices:
-    """Model's choices helper."""
-
-    __slots__ = "_map", "_rmap"
-
-    def __init__(self, choice: dict[str, Any] | EnumMeta | str, *choices: str):
-        """Parse provided choices."""
-        pw_choices = (
-            [(value, name) for name, value in choice.items()]
-            if isinstance(choice, dict)
-            else (
-                [(e.value, e.name) for e in choice]  # type: ignore[var-annotated]
-                if isinstance(choice, EnumMeta)
-                else [(choice, choice)]
-            )
-        )
-        pw_choices.extend([(choice, choice) for choice in choices])
-
-        self._map = {n: v for v, n in pw_choices}
-        self._rmap = dict(pw_choices)
-
-    def __str__(self) -> str:
-        """Return string representation."""
-        return ", ".join(self._map.keys())
-
-    def __repr__(self) -> str:
-        """Return string representation."""
-        return f"<Choices: {self}>"
-
-    def __iter__(self):
-        """Iterate self."""
-        return iter(self._rmap.items())
-
-    def __getattr__(self, name: str, default=None):
-        """Get choice value by name."""
-        return self._map.get(name, default)
-
-    def __getitem__(self, name: str):
-        """Get value by name."""
-        return self._map[name]
-
-    def __call__(self, value):
-        """Get name by value."""
-        return self._rmap[value]
-
-    def __deepcopy__(self, memo):
-        """Deep copy self."""
-        result = Choices(self._map)
-        memo[id(self)] = result
-        return result

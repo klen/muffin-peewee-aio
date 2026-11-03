@@ -13,7 +13,6 @@ from peewee_aio.model import AIOModel
 from peewee_migrate import Router
 
 from .fields import (
-    Choices,
     IntEnumField,
     JSONAsyncPGField,
     JSONLikeField,
@@ -30,7 +29,6 @@ if TYPE_CHECKING:
     from peewee_aio.types import TVModel
 
 __all__ = (
-    "Choices",
     "EnumField",
     "IntEnumField",
     "JSONLikeField",
@@ -67,9 +65,9 @@ class Plugin(BasePlugin):
         "dummy://localhost",
     )  # Dummy manager for support registration
 
-    def setup(self, app: "Application", **options):
+    def setup(self, app: "Application", *, name: str | None = None, **options) -> bool:
         """Init the plugin."""
-        if not super().setup(app, **options):
+        if not super().setup(app, name=name, **options):
             return False
 
         # Init manager and rebind models
@@ -85,6 +83,8 @@ class Plugin(BasePlugin):
 
         if self.cfg.auto_connection:
             app.middleware(self.get_middleware(), insert_first=True)
+
+        return True
 
     async def startup(self):
         """Connect to the database (initialize a pool and etc)."""
