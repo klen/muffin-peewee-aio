@@ -74,28 +74,28 @@ class JSONLikeField(JSONGenericField[TV], pw.Field):
 class EnumMixin(Generic[TV]):
     """Implement enum mixin."""
 
-    def __init__(self, enum, *args, **kwargs):
+    def __init__(self, enum: type[Enum], *args: Any, **kwargs: Any) -> None:
         """Initialize the field."""
         self.enum = enum
         kwargs.setdefault("choices", [(e.value, e.name) for e in enum])
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # type: ignore[call-arg]
 
-    def db_value(self, value) -> TV | None:
+    def db_value(self, value: TV | None) -> Any:
         """Convert python value to database."""
         if value is None:
             return value
 
         return value.value if isinstance(value, Enum) else value
 
-    def python_value(self, value: TV | None):
+    def python_value(self, value: Any) -> TV | None:
         """Convert database value to python."""
         if value is None:
             return value
 
-        return self.enum(value)
+        return cast("TV", self.enum(value))
 
 
-class StrEnumField(EnumMixin[str], GenericField[TV], pw.CharField):
+class StrEnumField(EnumMixin[TV], GenericField[TV], pw.CharField):
     """Implement enum field."""
 
     if TYPE_CHECKING:
@@ -116,10 +116,8 @@ class StrEnumField(EnumMixin[str], GenericField[TV], pw.CharField):
 
         def __new__(cls, *args, **kwargs) -> Any: ...
 
-        def __init__(self, enum: type[TV], **kwargs): ...
 
-
-class IntEnumField(EnumMixin[int], GenericField[TV], pw.IntegerField):
+class IntEnumField(EnumMixin[TV], GenericField[TV], pw.IntegerField):
     """Implement enum field."""
 
     if TYPE_CHECKING:
@@ -139,8 +137,6 @@ class IntEnumField(EnumMixin[int], GenericField[TV], pw.IntegerField):
         def __new__(cls, *args, **kwargs) -> Self: ...
 
         def __new__(cls, *args, **kwargs) -> Any: ...
-
-        def __init__(self, enum: type[TV], **kwargs): ...
 
 
 class URLField(GenericField[TV], pw.CharField):

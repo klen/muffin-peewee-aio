@@ -81,7 +81,7 @@ commands =
 """
 
 [tool.pyrefly]
-project-includes = ["muffin_peewee"]
+project-includes = ["muffin_peewee", "tests/test_typing.py"]
 
 [tool.ruff]
 include = ["muffin_peewee/*", "tests/**/*"]
