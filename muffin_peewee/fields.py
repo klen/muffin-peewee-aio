@@ -6,7 +6,7 @@ import json
 from contextlib import suppress
 from datetime import datetime, timezone
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Generic, Literal, cast, overload
+from typing import TYPE_CHECKING, Any, Generic, Literal, Self, cast, overload
 
 import peewee as pw
 from asgi_tools.types import TV
@@ -100,6 +100,22 @@ class StrEnumField(EnumMixin[str], GenericField[TV], pw.CharField):
 
     if TYPE_CHECKING:
 
+        @overload
+        def __new__(
+            cls, enum: type[TV], *args, null: Literal[True], **kwargs
+        ) -> StrEnumField[TV | None]: ...
+
+        @overload
+        def __new__(
+            cls, enum: type[TV], *args, null: Literal[False] = ..., **kwargs
+        ) -> StrEnumField[TV]: ...
+
+        # Subclasses may pass the enum from their own __init__
+        @overload
+        def __new__(cls, *args, **kwargs) -> Self: ...
+
+        def __new__(cls, *args, **kwargs) -> Any: ...
+
         def __init__(self, enum: type[TV], **kwargs): ...
 
 
@@ -107,6 +123,22 @@ class IntEnumField(EnumMixin[int], GenericField[TV], pw.IntegerField):
     """Implement enum field."""
 
     if TYPE_CHECKING:
+
+        @overload
+        def __new__(
+            cls, enum: type[TV], *args, null: Literal[True], **kwargs
+        ) -> IntEnumField[TV | None]: ...
+
+        @overload
+        def __new__(
+            cls, enum: type[TV], *args, null: Literal[False] = ..., **kwargs
+        ) -> IntEnumField[TV]: ...
+
+        # Subclasses may pass the enum from their own __init__
+        @overload
+        def __new__(cls, *args, **kwargs) -> Self: ...
+
+        def __new__(cls, *args, **kwargs) -> Any: ...
 
         def __init__(self, enum: type[TV], **kwargs): ...
 
